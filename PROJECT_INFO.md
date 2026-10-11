@@ -4,12 +4,11 @@
 
 **Scientific coordinator:** Olariu Florin – folariu@gmail.com
 
-**Team coordinator:** [nume] – [email]
-
 ## Team members
 | Name | Email | GitHub | Role |
 |---|---|---|---|
-| Dascaliu Ianis | ... | @... | ... |
+| Dascaliu Ianis | iianisalexandru@gmail.com
+ | @Ianisd17 | ... |
 | Ghiuzan Federica | federica.ghiuzan@gmail.com | @ghiuzan.federica | ... |
 | Nechita Teodora | teonechita31@gmail.com | @teq31 | ... |
 | Terchea Alexandra | alexandra.terchea@yahoo.com | @alexandraterchea | ... |
