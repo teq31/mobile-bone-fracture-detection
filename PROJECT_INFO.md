@@ -14,5 +14,5 @@
 | Terchea Alexandra | alexandra.terchea@yahoo.com | @alexandraterchea | ... |
 
 ## Links
-- Trello board: [link]
-- Repository: [link]
+- Trello board: https://trello.com/b/9c8PVoy7/mobile-bone-fracture-detection
+- Repository: https://github.com/teq31/mobile-bone-fracture-detection
