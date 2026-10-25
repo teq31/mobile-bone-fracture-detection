@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Java
+*.class
+/out/
+/target/
+/bin/
+.idea/
+*.iml
