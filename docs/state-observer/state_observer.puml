@@ -1,0 +1,99 @@
+@startuml State_Observer
+title State + Observer: Appointment and Notifications
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Observer" {
+  interface NotificationSubject {
+    +attach(o : NotificationObserver) : void
+    +detach(o : NotificationObserver) : void
+    +notifyObservers(n : Notification) : void
+  }
+  abstract class AbstractNotificationSubject {
+    #observers : List<NotificationObserver>
+  }
+  interface NotificationObserver {
+    +update(n : Notification) : void
+  }
+  class PushNotificationObserver {
+    -firebaseServerKey : String
+  }
+  class EmailNotificationObserver {
+    -sendGridApiKey : String
+    -senderAddress : String
+  }
+  class NotificationHistoryObserver {
+    -history : List<Notification>
+    +getNotificationsFor(u : User) : List<Notification>
+  }
+  class Notification {
+    -id : Long
+    -type : NotificationType
+    -recipient : User
+    -message : String
+    -createdAt : LocalDateTime
+    -read : boolean
+    +markAsRead() : void
+  }
+  enum NotificationType {
+    NEW_COMMENT
+    APPOINTMENT_REQUESTED
+    APPOINTMENT_CONFIRMED
+    APPOINTMENT_REMINDER
+    ANALYSIS_FINISHED
+  }
+}
+
+package "State" {
+  class Appointment {
+    -id : Long
+    -dateTime : LocalDateTime
+    -doctor : Doctor
+    -patient : Patient
+    -state : AppointmentState
+    +confirm() : void
+    +cancel() : void
+    +sendReminder() : void
+    +setState(s : AppointmentState) : void
+    +getStatus() : AppointmentStatus
+  }
+  interface AppointmentState {
+    +confirm(a : Appointment) : void
+    +cancel(a : Appointment) : void
+    +sendReminder(a : Appointment) : void
+    +getStatus() : AppointmentStatus
+  }
+  class RequestedState
+  class ConfirmedState
+  class CancelledState
+  enum AppointmentStatus {
+    REQUESTED
+    CONFIRMED
+    CANCELLED
+  }
+}
+
+class Doctor
+class Patient
+abstract class User
+Doctor --|> User
+Patient --|> User
+
+AbstractNotificationSubject ..|> NotificationSubject
+AbstractNotificationSubject o-- "0..*" NotificationObserver : observers
+PushNotificationObserver ..|> NotificationObserver
+EmailNotificationObserver ..|> NotificationObserver
+NotificationHistoryObserver ..|> NotificationObserver
+NotificationObserver ..> Notification : receives
+Notification --> NotificationType
+Notification --> "1" User : recipient
+
+Appointment --|> AbstractNotificationSubject
+Appointment o-- "1" AppointmentState : state
+RequestedState ..|> AppointmentState
+ConfirmedState ..|> AppointmentState
+CancelledState ..|> AppointmentState
+AppointmentState ..> AppointmentStatus
+Appointment --> "1" Doctor
+Appointment --> "1" Patient
+@enduml
