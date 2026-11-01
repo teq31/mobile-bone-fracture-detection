@@ -12,21 +12,21 @@ public class RequestedState implements AppointmentState {
 
     @Override
     public void confirm(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        appointment.setState(new ConfirmedState());
     }
 
     @Override
     public void cancel(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        appointment.setState(new CancelledState());
     }
 
     @Override
     public void sendReminder(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new IllegalStateException("Cannot send a reminder for an appointment that is not confirmed");
     }
 
     @Override
     public AppointmentStatus getStatus() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return AppointmentStatus.REQUESTED;
     }
 }
