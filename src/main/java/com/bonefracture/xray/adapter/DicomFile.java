@@ -21,6 +21,7 @@ public class DicomFile {
         return null;
     }
 
+    public File getFile() { return file; }
     public int getRows() { return rows; }
     public int getColumns() { return columns; }
     public String getBodyPartExamined() { return bodyPartExamined; }

@@ -15,6 +15,8 @@ public class PdfDocument {
         this.file = file;
     }
 
+    public File getFile() { return file; }
+
     public int getPageCount() { return pageCount; }
 
     public BufferedImage renderPage(int pageIndex, int dpi) {
