@@ -17,7 +17,10 @@ public class Notification {
     private boolean read;
 
     public Notification(NotificationType type, User recipient, String message) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        this.type = type;
+        this.recipient = recipient;
+        this.message = message;
+        this.createdAt = LocalDateTime.now();
     }
 
     public void markAsRead() {
@@ -25,11 +28,11 @@ public class Notification {
     }
 
     public NotificationType getType() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return type;
     }
 
     public User getRecipient() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return recipient;
     }
 
     public String getMessage() {

@@ -2,6 +2,7 @@ package com.bonefracture.appointment.state;
 
 import com.bonefracture.appointment.Appointment;
 import com.bonefracture.appointment.AppointmentStatus;
+import com.bonefracture.notification.NotificationType;
 
 /**
  * STATE pattern: Concrete State.
@@ -10,23 +11,27 @@ import com.bonefracture.appointment.AppointmentStatus;
  */
 public class ConfirmedState implements AppointmentState {
 
+    public static final ConfirmedState INSTANCE = new ConfirmedState();
+
     @Override
     public void confirm(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new IllegalStateException("Appointment is already confirmed");
     }
 
     @Override
     public void cancel(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        appointment.setState(CancelledState.INSTANCE);
+        appointment.notifyPatient(NotificationType.APPOINTMENT_CANCELLED, "Your appointment was cancelled");
     }
 
     @Override
     public void sendReminder(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        // stays Confirmed
+        appointment.notifyPatient(NotificationType.APPOINTMENT_REMINDER, "Reminder: you have an appointment");
     }
 
     @Override
     public AppointmentStatus getStatus() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return AppointmentStatus.CONFIRMED;
     }
 }
