@@ -10,6 +10,8 @@ import com.bonefracture.appointment.AppointmentStatus;
  */
 public class ConfirmedState implements AppointmentState {
 
+    public static final ConfirmedState INSTANCE = new ConfirmedState();
+
     @Override
     public void confirm(Appointment appointment) {
         throw new IllegalStateException("Appointment is already confirmed");
@@ -17,7 +19,7 @@ public class ConfirmedState implements AppointmentState {
 
     @Override
     public void cancel(Appointment appointment) {
-        appointment.setState(new CancelledState());
+        appointment.setState(CancelledState.INSTANCE);
     }
 
     @Override

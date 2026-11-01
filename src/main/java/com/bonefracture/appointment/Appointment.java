@@ -27,7 +27,7 @@ public class Appointment extends AbstractNotificationSubject {
         this.doctor = doctor;
         this.patient = patient;
         this.dateTime = dateTime;
-        this.state = new RequestedState();
+        this.state = RequestedState.INSTANCE;
     }
 
     /** Delegates to the current state. */

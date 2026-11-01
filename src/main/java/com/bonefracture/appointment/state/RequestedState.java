@@ -10,14 +10,17 @@ import com.bonefracture.appointment.AppointmentStatus;
  */
 public class RequestedState implements AppointmentState {
 
+    /** States have no fields, so one shared instance is enough (GoF State: sharing state objects). */
+    public static final RequestedState INSTANCE = new RequestedState();
+
     @Override
     public void confirm(Appointment appointment) {
-        appointment.setState(new ConfirmedState());
+        appointment.setState(ConfirmedState.INSTANCE);
     }
 
     @Override
     public void cancel(Appointment appointment) {
-        appointment.setState(new CancelledState());
+        appointment.setState(CancelledState.INSTANCE);
     }
 
     @Override

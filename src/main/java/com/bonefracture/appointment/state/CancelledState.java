@@ -9,6 +9,8 @@ import com.bonefracture.appointment.AppointmentStatus;
  */
 public class CancelledState implements AppointmentState {
 
+    public static final CancelledState INSTANCE = new CancelledState();
+
     @Override
     public void confirm(Appointment appointment) {
         throw new IllegalStateException("Cannot confirm a cancelled appointment");
