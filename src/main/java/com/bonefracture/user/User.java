@@ -5,11 +5,7 @@ import com.bonefracture.practice.PracticeAttempt;
 import com.bonefracture.xray.XRayImage;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
 
 public abstract class User {
@@ -27,20 +23,11 @@ public abstract class User {
     }
 
     public void signUp(String password) {
-        passwordHash = hash(password);
+        passwordHash = PasswordHasher.hash(password);
     }
 
     public boolean login(String password) {
-        return passwordHash != null && passwordHash.equals(hash(password));
-    }
-
-    private static String hash(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(md.digest(password.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
+        return PasswordHasher.matches(password, passwordHash);
     }
 
     public XRayImage uploadXRay(File file) {
