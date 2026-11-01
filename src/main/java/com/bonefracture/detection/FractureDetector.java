@@ -10,8 +10,15 @@ public class FractureDetector {
         this.model = model;
     }
 
+    public FractureDetector(ModelRegistry registry) {
+    }
+
     public void setModel(DetectionModel model) {
         this.model = model;
+    }
+
+    public DetectionModel getModel() {
+        return null;
     }
 
     public AnalysisResult analyze(XRayImage img) {
