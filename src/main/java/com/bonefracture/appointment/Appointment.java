@@ -59,14 +59,14 @@ public class Appointment extends AbstractNotificationSubject {
     }
 
     public LocalDateTime getDateTime() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return dateTime;
     }
 
     public Doctor getDoctor() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return doctor;
     }
 
     public Patient getPatient() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return patient;
     }
 }
