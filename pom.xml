@@ -6,11 +6,13 @@
 
     <groupId>com.bonefracture</groupId>
     <artifactId>mobile-bone-fracture-detection</artifactId>
-    <version>0.1.0</version>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>5.10.2</junit.version>
     </properties>
 
     <dependencies>
