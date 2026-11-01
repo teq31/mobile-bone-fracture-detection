@@ -15,7 +15,11 @@ public class ModelRegistry {
     }
 
     public DetectionModel getMainModel() {
-        // TODO return the model with isMain() == true
+        for (DetectionModel model : models) {
+            if (model.isMain()) {
+                return model;
+            }
+        }
         return null;
     }
 
