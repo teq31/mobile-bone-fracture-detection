@@ -38,6 +38,10 @@ public abstract class User {
         return history;
     }
 
+    String getPasswordHash() {
+        return passwordHash;
+    }
+
     public String getName() { return name; }
     public String getEmail() { return email; }
 }
