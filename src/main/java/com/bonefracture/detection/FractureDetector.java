@@ -7,17 +7,14 @@ public class FractureDetector {
     private DetectionModel model;
 
     public FractureDetector(DetectionModel model) {
-        if (model == null) {
-            throw new IllegalArgumentException("model is null");
-        }
-        this.model = model;
+        setModel(model);
     }
 
     public FractureDetector(ModelRegistry registry) {
-        this.model = registry.getMainModel();
+        this(registry.getMainModel());
     }
 
-    public void setModel(DetectionModel model) {
+    public final void setModel(DetectionModel model) {
         if (model == null) {
             throw new IllegalArgumentException("model is null");
         }
