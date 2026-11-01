@@ -4,12 +4,9 @@ import com.bonefracture.xray.BodyPart;
 import com.bonefracture.xray.FileFormat;
 import com.bonefracture.xray.XRayImage;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 
 // Adapter pattern - Adapter
 // Converts a DICOM file (the format used in hospitals) into an XRayImage (8-bit PNG next to the file).
@@ -51,14 +48,8 @@ public class DicomXRayAdapter implements XRayImageSource {
             }
         }
 
-        File source = dicom.getFile();
-        String baseName = source.getName().replaceFirst("(?i)\\.dcm$", "");
-        File png = new File(source.getParentFile(), baseName + ".png");
-        try {
-            ImageIO.write(gray, "png", png);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Could not save the DICOM image as PNG", e);
-        }
+        File png = AdapterSupport.siblingFile(dicom.getFile(), "dcm", ".png");
+        AdapterSupport.savePng(gray, png);
         return new XRayImage(png.getPath(), FileFormat.PNG, part, false);
     }
 

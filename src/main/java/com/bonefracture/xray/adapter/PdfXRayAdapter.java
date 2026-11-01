@@ -4,11 +4,8 @@ import com.bonefracture.xray.BodyPart;
 import com.bonefracture.xray.FileFormat;
 import com.bonefracture.xray.XRayImage;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 
 // Adapter pattern - Adapter
 // Converts a page of a PDF document into an XRayImage (saved as PNG next to the PDF).
@@ -34,19 +31,10 @@ public class PdfXRayAdapter implements XRayImageSource {
 
     @Override
     public XRayImage toXRayImage(BodyPart bodyPart) {
-        if (bodyPart == null) {
-            throw new IllegalArgumentException("The body part of the X-ray is required");
-        }
+        AdapterSupport.requireBodyPart(bodyPart);
         BufferedImage page = pdf.renderPage(pageIndex, RENDER_DPI);
-
-        File source = pdf.getFile();
-        String baseName = source.getName().replaceFirst("(?i)\\.pdf$", "");
-        File png = new File(source.getParentFile(), baseName + "-page" + (pageIndex + 1) + ".png");
-        try {
-            ImageIO.write(page, "png", png);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Could not save the PDF page as PNG", e);
-        }
+        File png = AdapterSupport.siblingFile(pdf.getFile(), "pdf", "-page" + (pageIndex + 1) + ".png");
+        AdapterSupport.savePng(page, png);
         return new XRayImage(png.getPath(), FileFormat.PNG, bodyPart, false);
     }
 

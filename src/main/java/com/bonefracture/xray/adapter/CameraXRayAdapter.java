@@ -26,9 +26,7 @@ public class CameraXRayAdapter implements XRayImageSource {
 
     @Override
     public XRayImage toXRayImage(BodyPart bodyPart) {
-        if (bodyPart == null) {
-            throw new IllegalArgumentException("The body part of the X-ray is required");
-        }
+        AdapterSupport.requireBodyPart(bodyPart);
         byte[] photo = capture.getJpegBytes();
         if (photo == null || photo.length == 0) {
             throw new IllegalArgumentException("The camera photo is empty");

@@ -22,9 +22,7 @@ public class ImageFileAdapter implements XRayImageSource {
 
     @Override
     public XRayImage toXRayImage(BodyPart bodyPart) {
-        if (bodyPart == null) {
-            throw new IllegalArgumentException("The body part of the X-ray is required");
-        }
+        AdapterSupport.requireBodyPart(bodyPart);
         if (!file.isFile()) {
             throw new IllegalArgumentException("File not found: " + file.getPath());
         }
