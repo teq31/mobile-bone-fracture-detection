@@ -1,6 +1,6 @@
 package com.bonefracture.service;
 
-import com.bonefracture.config.ConfigurationException;
+import com.bonefracture.config.AppConfig;
 import com.bonefracture.config.Language;
 
 import java.util.List;
@@ -8,30 +8,26 @@ import java.util.List;
 public class ConfigurationService {
 
     public void loadConfiguration(String path) {
-        // TODO delegate to AppConfig.getInstance().load(path)
+        AppConfig.getInstance().load(path);
     }
 
     public void loadDefault() {
-        // TODO delegate to AppConfig using AppConfig.DEFAULT_CONFIG_PATH
+        AppConfig.getInstance().load(AppConfig.DEFAULT_CONFIG_PATH);
     }
 
     public float getConfidenceThreshold() {
-        // TODO read from the AppConfig singleton
-        return 0;
+        return AppConfig.getInstance().getDefaultConfidenceThreshold();
     }
 
     public long getMaxFileSizeBytes() {
-        // TODO read from the AppConfig singleton
-        return 0;
+        return AppConfig.getInstance().getMaxFileSizeBytes();
     }
 
     public List<String> getAllowedFileTypes() {
-        // TODO read from the AppConfig singleton
-        return null;
+        return AppConfig.getInstance().getAllowedFileTypes();
     }
 
     public Language getDefaultLanguage() {
-        // TODO read from the AppConfig singleton
-        return null;
+        return AppConfig.getInstance().getDefaultLanguage();
     }
 }
