@@ -21,6 +21,7 @@ class AppointmentServiceTest {
     private Doctor doctor;
     private Patient patient;
     private LocalDateTime dateTime;
+    private Appointment appointment;
 
     @BeforeEach
     void setUp() {
@@ -28,12 +29,11 @@ class AppointmentServiceTest {
         doctor = new Doctor("Dr. Smith", "smith@clinic.com");
         patient = new Patient("John Doe", "john@mail.com");
         dateTime = LocalDateTime.of(2026, 11, 10, 10, 0);
+        appointment = appointmentService.requestAppointment(doctor, patient, dateTime);
     }
 
     @Test
     void requestAppointmentCreatesRequestedAppointment() {
-        Appointment appointment = appointmentService.requestAppointment(doctor, patient, dateTime);
-
         assertEquals(AppointmentStatus.REQUESTED, appointment.getStatus());
         assertSame(doctor, appointment.getDoctor());
         assertSame(patient, appointment.getPatient());
@@ -42,8 +42,6 @@ class AppointmentServiceTest {
 
     @Test
     void confirmMovesAppointmentToConfirmed() {
-        Appointment appointment = appointmentService.requestAppointment(doctor, patient, dateTime);
-
         appointmentService.confirm(appointment);
 
         assertEquals(AppointmentStatus.CONFIRMED, appointment.getStatus());
@@ -51,8 +49,6 @@ class AppointmentServiceTest {
 
     @Test
     void cancelMovesAppointmentToCancelled() {
-        Appointment appointment = appointmentService.requestAppointment(doctor, patient, dateTime);
-
         appointmentService.cancel(appointment);
 
         assertEquals(AppointmentStatus.CANCELLED, appointment.getStatus());
@@ -60,7 +56,6 @@ class AppointmentServiceTest {
 
     @Test
     void sendReminderKeepsConfirmedAppointmentConfirmed() {
-        Appointment appointment = appointmentService.requestAppointment(doctor, patient, dateTime);
         appointmentService.confirm(appointment);
 
         appointmentService.sendReminder(appointment);
@@ -70,8 +65,6 @@ class AppointmentServiceTest {
 
     @Test
     void actionNotAllowedThroughServiceThrows() {
-        Appointment appointment = appointmentService.requestAppointment(doctor, patient, dateTime);
-
         assertThrows(IllegalStateException.class, () -> appointmentService.sendReminder(appointment));
     }
 }
