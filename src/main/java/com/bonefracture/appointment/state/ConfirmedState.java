@@ -2,6 +2,8 @@ package com.bonefracture.appointment.state;
 
 import com.bonefracture.appointment.Appointment;
 import com.bonefracture.appointment.AppointmentStatus;
+import com.bonefracture.notification.Notification;
+import com.bonefracture.notification.NotificationType;
 
 /**
  * STATE pattern: Concrete State.
@@ -20,11 +22,15 @@ public class ConfirmedState implements AppointmentState {
     @Override
     public void cancel(Appointment appointment) {
         appointment.setState(CancelledState.INSTANCE);
+        appointment.notifyObservers(new Notification(NotificationType.APPOINTMENT_CANCELLED,
+                appointment.getPatient(), "Your appointment was cancelled"));
     }
 
     @Override
     public void sendReminder(Appointment appointment) {
         // stays Confirmed
+        appointment.notifyObservers(new Notification(NotificationType.APPOINTMENT_REMINDER,
+                appointment.getPatient(), "Reminder: you have an appointment"));
     }
 
     @Override
