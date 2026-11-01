@@ -13,14 +13,22 @@ public class ImageFileAdapter implements XRayImageSource {
     private FileFormat format; // JPG or PNG
 
     public ImageFileAdapter(File file, FileFormat format) {
+        if (format != FileFormat.JPG && format != FileFormat.PNG) {
+            throw new IllegalArgumentException("ImageFileAdapter accepts only JPG or PNG files, not " + format);
+        }
         this.file = file;
         this.format = format;
     }
 
     @Override
     public XRayImage toXRayImage(BodyPart bodyPart) {
-        // TODO copy the file to app storage and build the XRayImage
-        return null;
+        if (bodyPart == null) {
+            throw new IllegalArgumentException("The body part of the X-ray is required");
+        }
+        if (!file.isFile()) {
+            throw new IllegalArgumentException("File not found: " + file.getPath());
+        }
+        return new XRayImage(file.getPath(), format, bodyPart, false);
     }
 
     @Override
