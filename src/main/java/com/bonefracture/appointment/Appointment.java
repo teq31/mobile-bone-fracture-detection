@@ -2,6 +2,8 @@ package com.bonefracture.appointment;
 
 import com.bonefracture.appointment.state.AppointmentState;
 import com.bonefracture.appointment.state.RequestedState;
+import com.bonefracture.notification.Notification;
+import com.bonefracture.notification.NotificationType;
 import com.bonefracture.notification.observer.AbstractNotificationSubject;
 import com.bonefracture.user.Doctor;
 import com.bonefracture.user.Patient;
@@ -48,6 +50,11 @@ public class Appointment extends AbstractNotificationSubject {
     /** Called by the concrete states to move the appointment to a new state. */
     public void setState(AppointmentState state) {
         this.state = state;
+    }
+
+    /** Called by the concrete states to tell the observers what changed. */
+    public void notifyPatient(NotificationType type, String message) {
+        notifyObservers(new Notification(type, patient, message));
     }
 
     public AppointmentStatus getStatus() {
