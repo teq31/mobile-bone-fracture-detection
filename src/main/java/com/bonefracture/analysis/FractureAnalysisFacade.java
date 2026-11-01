@@ -44,21 +44,13 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
 
     @Override
     public AnalysisResult analyzeXRay(User user, XRayImageSource source, BodyPart bodyPart) {
-        XRayImage image = source.toXRayImage(bodyPart);
-        if (!image.validate()) {
-            throw new IllegalArgumentException("The X-ray image is not valid: " + image.getPath());
-        }
+        XRayImage image = convertAndValidate(source, bodyPart);
         DetectionModel mainModel = modelRegistry.getMainModel();
         if (mainModel == null) {
             throw new IllegalStateException("No main detection model is registered");
         }
-        XRayImage prepared = preprocessor.normalize(preprocessor.resize(image));
 
-        detector.setModel(mainModel);
-        AnalysisResult result = detector.analyze(prepared);
-        for (Detection detection : result.getDetections()) {
-            detection.setHeatmap(heatmapGenerator.generate(prepared, detection));
-        }
+        AnalysisResult result = runModel(mainModel, preprocess(image));
 
         historyRepository.save(user, image);
         return result;
@@ -69,20 +61,12 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         if (!doctor.isVerified()) {
             throw new IllegalStateException("Only doctors verified by an administrator can compare models");
         }
-        XRayImage image = source.toXRayImage(bodyPart);
-        if (!image.validate()) {
-            throw new IllegalArgumentException("The X-ray image is not valid: " + image.getPath());
-        }
-        XRayImage prepared = preprocessor.normalize(preprocessor.resize(image));
+        XRayImage image = convertAndValidate(source, bodyPart);
+        XRayImage prepared = preprocess(image);
 
         List<AnalysisResult> results = new ArrayList<>();
         for (DetectionModel model : modelRegistry.getAllModels()) {
-            detector.setModel(model);
-            AnalysisResult result = detector.analyze(prepared);
-            for (Detection detection : result.getDetections()) {
-                detection.setHeatmap(heatmapGenerator.generate(prepared, detection));
-            }
-            results.add(result);
+            results.add(runModel(model, prepared));
         }
 
         historyRepository.save(doctor, image);
@@ -92,5 +76,28 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
     @Override
     public List<XRayImage> getHistory(User user) {
         return historyRepository.findByUser(user);
+    }
+
+    // ---- steps shared by analyzeXRay and compareModels (TDD iteration 2, step 5 - refactor)
+
+    private XRayImage convertAndValidate(XRayImageSource source, BodyPart bodyPart) {
+        XRayImage image = source.toXRayImage(bodyPart);
+        if (!image.validate()) {
+            throw new IllegalArgumentException("The X-ray image is not valid: " + image.getPath());
+        }
+        return image;
+    }
+
+    private XRayImage preprocess(XRayImage image) {
+        return preprocessor.normalize(preprocessor.resize(image));
+    }
+
+    private AnalysisResult runModel(DetectionModel model, XRayImage prepared) {
+        detector.setModel(model);
+        AnalysisResult result = detector.analyze(prepared);
+        for (Detection detection : result.getDetections()) {
+            detection.setHeatmap(heatmapGenerator.generate(prepared, detection));
+        }
+        return result;
     }
 }
