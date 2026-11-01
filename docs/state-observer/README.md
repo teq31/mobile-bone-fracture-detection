@@ -1,8 +1,12 @@
 # State + Observer: appointments and notifications
 
-Part of Problem 1, Lab 4 (Mobile Bone Fracture Detection). Java, declarations only:
-attributes, method signatures and relationships, no functionality
-(method bodies only throw UnsupportedOperationException).
+Part of Problem 1 (Mobile Bone Fracture Detection), Java.
+- Lab 4: the class structure of the two patterns (declarations only).
+- Lab 5: the behaviour was implemented with Test Driven Development, in two iterations,
+  together with the SOA services `AppointmentService` and `NotificationService`.
+  The TDD steps, tests and screenshots are in [tdd/README.md](tdd/README.md).
+
+Run the tests with `mvn test`.
 
 ## State: appointment lifecycle
 | Role in the pattern | Class |
@@ -31,6 +35,7 @@ returned by `getStatus()`.
 
 `Notification` + `NotificationType` come from the team class diagram
 (NEW_COMMENT, APPOINTMENT_REQUESTED, APPOINTMENT_CONFIRMED, APPOINTMENT_REMINDER, ANALYSIS_FINISHED).
+`APPOINTMENT_CANCELLED` was added in Lab 5, so that a cancellation also notifies the observers.
 
 ## How the two patterns work together
 `Appointment` extends `AbstractNotificationSubject`: every state change
@@ -38,7 +43,16 @@ returned by `getStatus()`.
 Other classes that produce events (`Comment` -> NEW_COMMENT, `AnalysisResult` -> ANALYSIS_FINISHED)
 can extend `AbstractNotificationSubject` too.
 
+## Services (SOA)
+| Service | Implementation | What it does |
+|---|---|---|
+| `appointment.AppointmentService` | `AppointmentServiceImpl` | `requestAppointment`, `confirm`, `cancel`, `sendReminder`; the rules stay in the state classes |
+| `notification.NotificationService` | `NotificationServiceImpl` | `track(subject)` attaches a `NotificationHistoryObserver`; `getNotificationsFor(user)` returns the user's notifications |
+
 ## Notes
-- Sources are in `src/main/java/com/bonefracture/` (`appointment` and `notification` packages).
+- Sources are in `src/main/java/com/bonefracture/` (`appointment` and `notification` packages),
+  tests in `src/test/java/com/bonefracture/`.
+- `PushNotificationObserver` and `EmailNotificationObserver` are still declarations only
+  (they need Firebase / SendGrid accounts).
 - `User`, `Doctor`, `Patient` are the team classes from the `user` package (branch `ianis/design-patterns`, Factory Method).
 - `java.util.Observer` is not used because it is deprecated since Java 9.
