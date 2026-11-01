@@ -6,29 +6,21 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * TDD - Iteration 2 (Singleton pattern).
- * Tests written BEFORE implementing AppConfig.load() and ConfigLoader.load().
- */
 class AppConfigTest {
 
     private String testConfigPath() {
-        // Resolve the test properties file from the test classpath.
         return getClass().getClassLoader()
                 .getResource("test-application.properties")
                 .getPath();
     }
 
-    // Already passes because AppConfig uses the Holder idiom (Singleton is already
-    // implemented), so it is not part of the RED phase. Re-enable after the GREEN phase
-    // to document the Singleton invariant.
-    // @Test
-    // void getInstance_returnsTheSameInstanceEveryTime() {
-    //     AppConfig first = AppConfig.getInstance();
-    //     AppConfig second = AppConfig.getInstance();
-    //
-    //     assertSame(first, second);
-    // }
+    @Test
+    void getInstance_returnsTheSameInstanceEveryTime() {
+        AppConfig first = AppConfig.getInstance();
+        AppConfig second = AppConfig.getInstance();
+
+        assertSame(first, second);
+    }
 
     @Test
     void load_throwsConfigurationException_whenFileIsMissing() {

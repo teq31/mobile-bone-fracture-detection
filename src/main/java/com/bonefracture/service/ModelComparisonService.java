@@ -2,6 +2,7 @@ package com.bonefracture.service;
 
 import com.bonefracture.detection.ModelRegistry;
 import com.bonefracture.detection.composite.AgreementLevel;
+import com.bonefracture.detection.composite.AgreementView;
 import com.bonefracture.detection.composite.DetectionComponent;
 import com.bonefracture.detection.composite.DetectionGroup;
 import com.bonefracture.xray.XRayImage;
@@ -9,25 +10,22 @@ import com.bonefracture.xray.XRayImage;
 public class ModelComparisonService {
 
     private final ModelRegistry registry;
-    private final float minIou;
+    private final AgreementView agreementView;
 
     public ModelComparisonService(ModelRegistry registry, float minIou) {
         this.registry = registry;
-        this.minIou = minIou;
+        this.agreementView = new AgreementView(registry, minIou);
     }
 
     public DetectionGroup compareModels(XRayImage image) {
-        // TODO run all models through AgreementView and build the grouped view
-        return null;
+        return agreementView.buildView(agreementView.runAllModels(image));
     }
 
     public AgreementLevel getAgreementLevel(DetectionComponent finding) {
-        // TODO delegate to AgreementView / DetectionGroup using the registered model count
-        return null;
+        return agreementView.getLevel(finding);
     }
 
     public int getRegisteredModelCount() {
-        // TODO number of models currently registered
-        return 0;
+        return registry.getAllModels().size();
     }
 }

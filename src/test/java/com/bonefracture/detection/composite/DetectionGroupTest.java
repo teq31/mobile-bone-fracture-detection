@@ -10,10 +10,6 @@ import java.awt.Rectangle;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * TDD - Iteration 1 (Composite pattern).
- * Tests written BEFORE implementing DetectionGroup's logic.
- */
 class DetectionGroupTest {
 
     private static class FakeModel extends DetectionModel {
@@ -95,7 +91,6 @@ class DetectionGroupTest {
         DetectionGroup group = new DetectionGroup(0.5f);
         group.add(leaf("fracture", 0.8f, new Rectangle(0, 0, 10, 10), a));
 
-        // Heavily overlapping box -> should be accepted into the group.
         DetectionLeaf overlapping = leaf("fracture", 0.7f, new Rectangle(1, 1, 10, 10), b);
         assertTrue(group.accepts(overlapping));
     }
@@ -104,7 +99,6 @@ class DetectionGroupTest {
     void accepts_anyComponentWhenGroupIsEmpty() {
         DetectionModel a = new FakeModel("A");
 
-        // An empty group has no reference box yet, so it must accept the first component.
         DetectionGroup group = new DetectionGroup(0.5f);
 
         DetectionLeaf first = leaf("fracture", 0.8f, new Rectangle(0, 0, 10, 10), a);
@@ -119,7 +113,6 @@ class DetectionGroupTest {
         DetectionGroup group = new DetectionGroup(0.5f);
         group.add(leaf("fracture", 0.8f, new Rectangle(0, 0, 10, 10), a));
 
-        // Disjoint box -> IoU is 0 -> should be rejected.
         DetectionLeaf far = leaf("fracture", 0.7f, new Rectangle(100, 100, 10, 10), b);
         assertFalse(group.accepts(far));
     }
