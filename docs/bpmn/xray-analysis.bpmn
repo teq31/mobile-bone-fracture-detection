@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_XRayAnalysis" targetNamespace="http://bonefracture.com/bpmn" exporter="Hand-written" exporterVersion="1.0">
+  <bpmn:error id="Error_Model" name="ModelError" errorCode="MODEL_ERROR" />
+  <bpmn:collaboration id="Collaboration_XRayAnalysis">
+    <bpmn:participant id="Participant_App" name="X-ray Analysis (Mobile Bone Fracture Detection)" processRef="Process_XRayAnalysis" />
+    <bpmn:participant id="Participant_FCM" name="Firebase Cloud Messaging" />
+    <bpmn:messageFlow id="MessageFlow_Notify" name="ANALYSIS_FINISHED" sourceRef="Task_Notify" targetRef="Participant_FCM" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_XRayAnalysis" name="X-ray Analysis" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_User" name="User (Student / Doctor / Patient)">
+        <bpmn:flowNodeRef>Start_Analyze</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_MergeSource</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Source</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Upload</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Photo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_MergeAdded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ChooseAnother</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Reviewed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_App" name="Mobile App">
+        <bpmn:flowNodeRef>Task_Convert</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Sub_Validate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Valid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Preprocess</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Role</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ModelError</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Threshold</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Show</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Disclaimer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_MergeDisclaimer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_ForkReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SaveLocal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Online</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Online</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_MergeOnline</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sync</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Models" name="Detection Models">
+        <bpmn:flowNodeRef>Task_MainModel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Fork</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Yolo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RfDetr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Consensus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_MergeModels</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Heatmaps</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Boundary_ModelError</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Backend" name="Backend API">
+        <bpmn:flowNodeRef>Task_Store</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Notify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Done</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Analyze" name="X-ray to analyze">
+      <bpmn:outgoing>Flow_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gw_MergeSource">
+      <bpmn:incoming>Flow_01</bpmn:incoming>
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+      <bpmn:outgoing>Flow_02</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gw_Source" name="How is the X-ray added?">
+      <bpmn:incoming>Flow_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_03</bpmn:outgoing>
+      <bpmn:outgoing>Flow_04</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Upload" name="Upload file (JPG / PNG / PDF)">
+      <bpmn:incoming>Flow_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_05</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Photo" name="Take a photo with the camera">
+      <bpmn:incoming>Flow_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_06</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_MergeAdded">
+      <bpmn:incoming>Flow_05</bpmn:incoming>
+      <bpmn:incoming>Flow_06</bpmn:incoming>
+      <bpmn:outgoing>Flow_07</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Convert" name="Convert source to XRayImage">
+      <bpmn:incoming>Flow_07</bpmn:incoming>
+      <bpmn:outgoing>Flow_08</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_Task_Convert_Data_XRayImage"><bpmn:targetRef>Data_XRayImage</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="Sub_Validate" name="Validate image" triggeredByEvent="false">
+      <bpmn:incoming>Flow_08</bpmn:incoming>
+      <bpmn:outgoing>Flow_09</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_Sub_Validate_Data_Validation"><bpmn:targetRef>Data_Validation</bpmn:targetRef></bpmn:dataOutputAssociation>
+      <bpmn:startEvent id="Sub_Start">
+        <bpmn:outgoing>SubFlow_1</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:task id="Sub_FileType" name="Check file type (JPG / PNG / PDF)">
+        <bpmn:incoming>SubFlow_1</bpmn:incoming>
+        <bpmn:outgoing>SubFlow_2</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:task id="Sub_FileSize" name="Check file size">
+        <bpmn:incoming>SubFlow_2</bpmn:incoming>
+        <bpmn:outgoing>SubFlow_3</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:task id="Sub_LooksLike" name="Check it looks like an X-ray">
+        <bpmn:incoming>SubFlow_3</bpmn:incoming>
+        <bpmn:outgoing>SubFlow_4</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:endEvent id="Sub_End" name="ValidationReport created">
+        <bpmn:incoming>SubFlow_4</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SubFlow_1" sourceRef="Sub_Start" targetRef="Sub_FileType" />
+      <bpmn:sequenceFlow id="SubFlow_2" sourceRef="Sub_FileType" targetRef="Sub_FileSize" />
+      <bpmn:sequenceFlow id="SubFlow_3" sourceRef="Sub_FileSize" targetRef="Sub_LooksLike" />
+      <bpmn:sequenceFlow id="SubFlow_4" sourceRef="Sub_LooksLike" targetRef="Sub_End" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="Gw_Valid" name="Image valid?">
+      <bpmn:incoming>Flow_09</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_ChooseAnother" name="See failed checks, choose another image">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_Preprocess" name="Preprocess image (resize, normalize)">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_13</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Role" name="User role?">
+      <bpmn:incoming>Flow_13</bpmn:incoming>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+      <bpmn:outgoing>Flow_15</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_MainModel" name="Run main model (YOLO)">
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_21</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gw_Fork">
+      <bpmn:incoming>Flow_15</bpmn:incoming>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_Yolo" name="Run YOLO model">
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+      <bpmn:outgoing>Flow_18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_RfDetr" name="Run RF-DETR model">
+      <bpmn:incoming>Flow_17</bpmn:incoming>
+      <bpmn:outgoing>Flow_19</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gw_Join">
+      <bpmn:incoming>Flow_18</bpmn:incoming>
+      <bpmn:incoming>Flow_19</bpmn:incoming>
+      <bpmn:outgoing>Flow_20</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_Consensus" name="Build ConsensusView">
+      <bpmn:incoming>Flow_20</bpmn:incoming>
+      <bpmn:outgoing>Flow_22</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_MergeModels">
+      <bpmn:incoming>Flow_21</bpmn:incoming>
+      <bpmn:incoming>Flow_22</bpmn:incoming>
+      <bpmn:outgoing>Flow_23</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Heatmaps" name="Generate heatmaps (EigenCAM)">
+      <bpmn:incoming>Flow_23</bpmn:incoming>
+      <bpmn:outgoing>Flow_24</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_Task_Heatmaps_Data_Result"><bpmn:targetRef>Data_Result</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:task id="Task_ModelError" name="Show analysis error">
+      <bpmn:incoming>Flow_42</bpmn:incoming>
+      <bpmn:outgoing>Flow_43</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="End_Error" name="Analysis failed">
+      <bpmn:incoming>Flow_43</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrDef_End" errorRef="Error_Model" />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_Threshold" name="Filter detections by confidence threshold">
+      <bpmn:incoming>Flow_24</bpmn:incoming>
+      <bpmn:outgoing>Flow_25</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:task id="Task_Show" name="Show boxes, scores and heatmap">
+      <bpmn:incoming>Flow_25</bpmn:incoming>
+      <bpmn:outgoing>Flow_26</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gw_Patient" name="Patient?">
+      <bpmn:incoming>Flow_26</bpmn:incoming>
+      <bpmn:outgoing>Flow_27</bpmn:outgoing>
+      <bpmn:outgoing>Flow_28</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_Disclaimer" name="Show medical disclaimer">
+      <bpmn:incoming>Flow_27</bpmn:incoming>
+      <bpmn:outgoing>Flow_29</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gw_MergeDisclaimer">
+      <bpmn:incoming>Flow_28</bpmn:incoming>
+      <bpmn:incoming>Flow_29</bpmn:incoming>
+      <bpmn:outgoing>Flow_30</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="Gw_ForkReview">
+      <bpmn:incoming>Flow_30</bpmn:incoming>
+      <bpmn:outgoing>Flow_31</bpmn:outgoing>
+      <bpmn:outgoing>Flow_33</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="Task_Review" name="Review result (zoom, show / hide boxes)">
+      <bpmn:incoming>Flow_31</bpmn:incoming>
+      <bpmn:outgoing>Flow_32</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End_Reviewed" name="Result reviewed">
+      <bpmn:incoming>Flow_32</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_SaveLocal" name="Save analysis to history (local)">
+      <bpmn:incoming>Flow_33</bpmn:incoming>
+      <bpmn:outgoing>Flow_34</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_Task_SaveLocal_Store_Local"><bpmn:targetRef>Store_Local</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Online" name="Internet available?">
+      <bpmn:incoming>Flow_34</bpmn:incoming>
+      <bpmn:outgoing>Flow_35</bpmn:outgoing>
+      <bpmn:outgoing>Flow_36</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="Event_Online" name="Connection restored">
+      <bpmn:incoming>Flow_36</bpmn:incoming>
+      <bpmn:outgoing>Flow_37</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="CondDef_Online"><bpmn:condition xsi:type="bpmn:tFormalExpression">internet connection available</bpmn:condition></bpmn:conditionalEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Gw_MergeOnline">
+      <bpmn:incoming>Flow_35</bpmn:incoming>
+      <bpmn:incoming>Flow_37</bpmn:incoming>
+      <bpmn:outgoing>Flow_38</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_Sync" name="Sync analysis to the backend">
+      <bpmn:incoming>Flow_38</bpmn:incoming>
+      <bpmn:outgoing>Flow_39</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="Task_Store" name="Store X-ray and analysis">
+      <bpmn:incoming>Flow_39</bpmn:incoming>
+      <bpmn:outgoing>Flow_40</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="Assoc_Task_Store_Store_Server"><bpmn:targetRef>Store_Server</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Task_Notify" name="Send push notification">
+      <bpmn:incoming>Flow_40</bpmn:incoming>
+      <bpmn:outgoing>Flow_41</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="End_Done" name="Analysis saved">
+      <bpmn:incoming>Flow_41</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:dataObject id="Data_XRayImage_Obj" />
+    <bpmn:dataObjectReference id="Data_XRayImage" name="XRayImage" dataObjectRef="Data_XRayImage_Obj" />
+    <bpmn:dataObject id="Data_Validation_Obj" />
+    <bpmn:dataObjectReference id="Data_Validation" name="ValidationReport" dataObjectRef="Data_Validation_Obj" />
+    <bpmn:dataObject id="Data_Result_Obj" />
+    <bpmn:dataObjectReference id="Data_Result" name="AnalysisResult" dataObjectRef="Data_Result_Obj" />
+    <bpmn:dataStoreReference id="Store_Local" name="Local database (SQLite)" />
+    <bpmn:dataStoreReference id="Store_Server" name="Database (PostgreSQL)" />
+    <bpmn:boundaryEvent id="Boundary_ModelError" name="Model error" attachedToRef="Task_MainModel">
+      <bpmn:outgoing>Flow_42</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrDef_Boundary" errorRef="Error_Model" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_01" sourceRef="Start_Analyze" targetRef="Gw_MergeSource" />
+    <bpmn:sequenceFlow id="Flow_02" sourceRef="Gw_MergeSource" targetRef="Gw_Source" />
+    <bpmn:sequenceFlow id="Flow_03" name="File" sourceRef="Gw_Source" targetRef="Task_Upload" />
+    <bpmn:sequenceFlow id="Flow_04" name="Camera" sourceRef="Gw_Source" targetRef="Task_Photo" />
+    <bpmn:sequenceFlow id="Flow_05" sourceRef="Task_Upload" targetRef="Gw_MergeAdded" />
+    <bpmn:sequenceFlow id="Flow_06" sourceRef="Task_Photo" targetRef="Gw_MergeAdded" />
+    <bpmn:sequenceFlow id="Flow_07" sourceRef="Gw_MergeAdded" targetRef="Task_Convert" />
+    <bpmn:sequenceFlow id="Flow_08" sourceRef="Task_Convert" targetRef="Sub_Validate" />
+    <bpmn:sequenceFlow id="Flow_09" sourceRef="Sub_Validate" targetRef="Gw_Valid" />
+    <bpmn:sequenceFlow id="Flow_10" name="Yes" sourceRef="Gw_Valid" targetRef="Task_Preprocess" />
+    <bpmn:sequenceFlow id="Flow_11" name="No" sourceRef="Gw_Valid" targetRef="Task_ChooseAnother" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_ChooseAnother" targetRef="Gw_MergeSource" />
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Task_Preprocess" targetRef="Gw_Role" />
+    <bpmn:sequenceFlow id="Flow_14" name="Student / Patient" sourceRef="Gw_Role" targetRef="Task_MainModel" />
+    <bpmn:sequenceFlow id="Flow_15" name="Doctor" sourceRef="Gw_Role" targetRef="Gw_Fork" />
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Gw_Fork" targetRef="Task_Yolo" />
+    <bpmn:sequenceFlow id="Flow_17" sourceRef="Gw_Fork" targetRef="Task_RfDetr" />
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Task_Yolo" targetRef="Gw_Join" />
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Task_RfDetr" targetRef="Gw_Join" />
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="Gw_Join" targetRef="Task_Consensus" />
+    <bpmn:sequenceFlow id="Flow_21" sourceRef="Task_MainModel" targetRef="Gw_MergeModels" />
+    <bpmn:sequenceFlow id="Flow_22" sourceRef="Task_Consensus" targetRef="Gw_MergeModels" />
+    <bpmn:sequenceFlow id="Flow_23" sourceRef="Gw_MergeModels" targetRef="Task_Heatmaps" />
+    <bpmn:sequenceFlow id="Flow_24" sourceRef="Task_Heatmaps" targetRef="Task_Threshold" />
+    <bpmn:sequenceFlow id="Flow_25" sourceRef="Task_Threshold" targetRef="Task_Show" />
+    <bpmn:sequenceFlow id="Flow_26" sourceRef="Task_Show" targetRef="Gw_Patient" />
+    <bpmn:sequenceFlow id="Flow_27" name="Yes" sourceRef="Gw_Patient" targetRef="Task_Disclaimer" />
+    <bpmn:sequenceFlow id="Flow_28" name="No" sourceRef="Gw_Patient" targetRef="Gw_MergeDisclaimer" />
+    <bpmn:sequenceFlow id="Flow_29" sourceRef="Task_Disclaimer" targetRef="Gw_MergeDisclaimer" />
+    <bpmn:sequenceFlow id="Flow_30" sourceRef="Gw_MergeDisclaimer" targetRef="Gw_ForkReview" />
+    <bpmn:sequenceFlow id="Flow_31" sourceRef="Gw_ForkReview" targetRef="Task_Review" />
+    <bpmn:sequenceFlow id="Flow_32" sourceRef="Task_Review" targetRef="End_Reviewed" />
+    <bpmn:sequenceFlow id="Flow_33" sourceRef="Gw_ForkReview" targetRef="Task_SaveLocal" />
+    <bpmn:sequenceFlow id="Flow_34" sourceRef="Task_SaveLocal" targetRef="Gw_Online" />
+    <bpmn:sequenceFlow id="Flow_35" name="Yes" sourceRef="Gw_Online" targetRef="Gw_MergeOnline" />
+    <bpmn:sequenceFlow id="Flow_36" name="No" sourceRef="Gw_Online" targetRef="Event_Online" />
+    <bpmn:sequenceFlow id="Flow_37" sourceRef="Event_Online" targetRef="Gw_MergeOnline" />
+    <bpmn:sequenceFlow id="Flow_38" sourceRef="Gw_MergeOnline" targetRef="Task_Sync" />
+    <bpmn:sequenceFlow id="Flow_39" sourceRef="Task_Sync" targetRef="Task_Store" />
+    <bpmn:sequenceFlow id="Flow_40" sourceRef="Task_Store" targetRef="Task_Notify" />
+    <bpmn:sequenceFlow id="Flow_41" sourceRef="Task_Notify" targetRef="End_Done" />
+    <bpmn:sequenceFlow id="Flow_42" sourceRef="Boundary_ModelError" targetRef="Task_ModelError" />
+    <bpmn:sequenceFlow id="Flow_43" sourceRef="Task_ModelError" targetRef="End_Error" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_XRayAnalysis">
+    <bpmndi:BPMNPlane id="Plane_XRayAnalysis" bpmnElement="Collaboration_XRayAnalysis">
+      <bpmndi:BPMNShape id="Participant_App_di" bpmnElement="Participant_App" isHorizontal="true"><dc:Bounds x="40" y="40" width="4595" height="1060" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_User_di" bpmnElement="Lane_User" isHorizontal="true"><dc:Bounds x="70" y="40" width="4565" height="240" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_App_di" bpmnElement="Lane_App" isHorizontal="true"><dc:Bounds x="70" y="280" width="4565" height="240" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Models_di" bpmnElement="Lane_Models" isHorizontal="true"><dc:Bounds x="70" y="520" width="4565" height="360" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Backend_di" bpmnElement="Lane_Backend" isHorizontal="true"><dc:Bounds x="70" y="880" width="4565" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Analyze_di" bpmnElement="Start_Analyze"><dc:Bounds x="157" y="142" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="127" y="183" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_MergeSource_di" bpmnElement="Gw_MergeSource"><dc:Bounds x="300" y="135" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Source_di" bpmnElement="Gw_Source"><dc:Bounds x="450" y="135" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="338" y="109" width="105" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Upload_di" bpmnElement="Task_Upload"><dc:Bounds x="570" y="65" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Photo_di" bpmnElement="Task_Photo"><dc:Bounds x="570" y="175" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_MergeAdded_di" bpmnElement="Gw_MergeAdded"><dc:Bounds x="750" y="135" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Convert_di" bpmnElement="Task_Convert"><dc:Bounds x="870" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sub_Validate_di" bpmnElement="Sub_Validate" isExpanded="false"><dc:Bounds x="1020" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Valid_di" bpmnElement="Gw_Valid"><dc:Bounds x="1200" y="320" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1145" y="286" width="90" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ChooseAnother_di" bpmnElement="Task_ChooseAnother"><dc:Bounds x="1170" y="175" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Preprocess_di" bpmnElement="Task_Preprocess"><dc:Bounds x="1320" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Role_di" bpmnElement="Gw_Role"><dc:Bounds x="1500" y="320" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1445" y="286" width="90" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MainModel_di" bpmnElement="Task_MainModel"><dc:Bounds x="1620" y="545" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Fork_di" bpmnElement="Gw_Fork"><dc:Bounds x="1650" y="725" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Yolo_di" bpmnElement="Task_Yolo"><dc:Bounds x="1770" y="655" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RfDetr_di" bpmnElement="Task_RfDetr"><dc:Bounds x="1770" y="765" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Join_di" bpmnElement="Gw_Join"><dc:Bounds x="1950" y="725" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Consensus_di" bpmnElement="Task_Consensus"><dc:Bounds x="2070" y="710" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_MergeModels_di" bpmnElement="Gw_MergeModels"><dc:Bounds x="2250" y="560" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Heatmaps_di" bpmnElement="Task_Heatmaps"><dc:Bounds x="2370" y="545" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ModelError_di" bpmnElement="Task_ModelError"><dc:Bounds x="1770" y="415" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Error_di" bpmnElement="End_Error"><dc:Bounds x="1957" y="437" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="1927" y="478" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Threshold_di" bpmnElement="Task_Threshold"><dc:Bounds x="2520" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Show_di" bpmnElement="Task_Show"><dc:Bounds x="2670" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Patient_di" bpmnElement="Gw_Patient"><dc:Bounds x="2850" y="320" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2795" y="286" width="90" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Disclaimer_di" bpmnElement="Task_Disclaimer"><dc:Bounds x="2970" y="415" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_MergeDisclaimer_di" bpmnElement="Gw_MergeDisclaimer"><dc:Bounds x="3150" y="320" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_ForkReview_di" bpmnElement="Gw_ForkReview"><dc:Bounds x="3300" y="320" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Review_di" bpmnElement="Task_Review"><dc:Bounds x="3420" y="65" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Reviewed_di" bpmnElement="End_Reviewed"><dc:Bounds x="3607" y="87" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="3577" y="128" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SaveLocal_di" bpmnElement="Task_SaveLocal"><dc:Bounds x="3420" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Online_di" bpmnElement="Gw_Online"><dc:Bounds x="3600" y="320" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3545" y="286" width="90" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Online_di" bpmnElement="Event_Online"><dc:Bounds x="3757" y="437" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="3727" y="478" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_MergeOnline_di" bpmnElement="Gw_MergeOnline"><dc:Bounds x="3900" y="320" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sync_di" bpmnElement="Task_Sync"><dc:Bounds x="4020" y="305" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Store_di" bpmnElement="Task_Store"><dc:Bounds x="4170" y="905" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Notify_di" bpmnElement="Task_Notify"><dc:Bounds x="4320" y="905" width="110" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Done_di" bpmnElement="End_Done"><dc:Bounds x="4507" y="927" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="4477" y="968" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Data_XRayImage_di" bpmnElement="Data_XRayImage"><dc:Bounds x="907" y="430" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="877" y="485" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Data_Validation_di" bpmnElement="Data_Validation"><dc:Bounds x="1057" y="430" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1027" y="485" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Data_Result_di" bpmnElement="Data_Result"><dc:Bounds x="2407" y="780" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2377" y="835" width="96" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Store_Local_di" bpmnElement="Store_Local"><dc:Bounds x="3450" y="430" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3420" y="485" width="110" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Store_Server_di" bpmnElement="Store_Server"><dc:Bounds x="4200" y="1010" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4170" y="1065" width="110" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Boundary_ModelError_di" bpmnElement="Boundary_ModelError"><dc:Bounds x="1702" y="527" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="1628" y="531" width="70" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_FCM_di" bpmnElement="Participant_FCM" isHorizontal="true"><dc:Bounds x="40" y="1140" width="4595" height="60" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_01_di" bpmnElement="Flow_01"><di:waypoint x="193" y="160" /><di:waypoint x="300" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_di" bpmnElement="Flow_02"><di:waypoint x="350" y="160" /><di:waypoint x="450" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03_di" bpmnElement="Flow_03"><di:waypoint x="475" y="135" /><di:waypoint x="475" y="105" /><di:waypoint x="570" y="105" /><bpmndi:BPMNLabel><dc:Bounds x="481" y="113" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_di" bpmnElement="Flow_04"><di:waypoint x="475" y="185" /><di:waypoint x="475" y="215" /><di:waypoint x="570" y="215" /><bpmndi:BPMNLabel><dc:Bounds x="481" y="193" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_di" bpmnElement="Flow_05"><di:waypoint x="680" y="105" /><di:waypoint x="775" y="105" /><di:waypoint x="775" y="135" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06_di" bpmnElement="Flow_06"><di:waypoint x="680" y="215" /><di:waypoint x="775" y="215" /><di:waypoint x="775" y="185" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07_di" bpmnElement="Flow_07"><di:waypoint x="800" y="160" /><di:waypoint x="830" y="160" /><di:waypoint x="830" y="345" /><di:waypoint x="870" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08_di" bpmnElement="Flow_08"><di:waypoint x="980" y="345" /><di:waypoint x="1020" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09_di" bpmnElement="Flow_09"><di:waypoint x="1130" y="345" /><di:waypoint x="1200" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="1250" y="345" /><di:waypoint x="1320" y="345" /><bpmndi:BPMNLabel><dc:Bounds x="1256" y="325" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="1225" y="320" /><di:waypoint x="1225" y="255" /><bpmndi:BPMNLabel><dc:Bounds x="1231" y="280" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="1225" y="175" /><di:waypoint x="1225" y="52" /><di:waypoint x="325" y="52" /><di:waypoint x="325" y="135" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="1430" y="345" /><di:waypoint x="1500" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="1550" y="345" /><di:waypoint x="1675" y="345" /><di:waypoint x="1675" y="545" /><bpmndi:BPMNLabel><dc:Bounds x="1556" y="325" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="1525" y="370" /><di:waypoint x="1525" y="750" /><di:waypoint x="1650" y="750" /><bpmndi:BPMNLabel><dc:Bounds x="1531" y="553" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16"><di:waypoint x="1675" y="725" /><di:waypoint x="1675" y="695" /><di:waypoint x="1770" y="695" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17"><di:waypoint x="1675" y="775" /><di:waypoint x="1675" y="805" /><di:waypoint x="1770" y="805" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18"><di:waypoint x="1880" y="695" /><di:waypoint x="1975" y="695" /><di:waypoint x="1975" y="725" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19"><di:waypoint x="1880" y="805" /><di:waypoint x="1975" y="805" /><di:waypoint x="1975" y="775" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20"><di:waypoint x="2000" y="750" /><di:waypoint x="2070" y="750" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_21_di" bpmnElement="Flow_21"><di:waypoint x="1730" y="585" /><di:waypoint x="2250" y="585" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_22_di" bpmnElement="Flow_22"><di:waypoint x="2180" y="750" /><di:waypoint x="2275" y="750" /><di:waypoint x="2275" y="610" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_23_di" bpmnElement="Flow_23"><di:waypoint x="2300" y="585" /><di:waypoint x="2370" y="585" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_24_di" bpmnElement="Flow_24"><di:waypoint x="2480" y="585" /><di:waypoint x="2500" y="585" /><di:waypoint x="2500" y="345" /><di:waypoint x="2520" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_25_di" bpmnElement="Flow_25"><di:waypoint x="2630" y="345" /><di:waypoint x="2670" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_26_di" bpmnElement="Flow_26"><di:waypoint x="2780" y="345" /><di:waypoint x="2850" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_27_di" bpmnElement="Flow_27"><di:waypoint x="2875" y="370" /><di:waypoint x="2875" y="455" /><di:waypoint x="2970" y="455" /><bpmndi:BPMNLabel><dc:Bounds x="2881" y="406" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_28_di" bpmnElement="Flow_28"><di:waypoint x="2900" y="345" /><di:waypoint x="3150" y="345" /><bpmndi:BPMNLabel><dc:Bounds x="2906" y="325" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_29_di" bpmnElement="Flow_29"><di:waypoint x="3080" y="455" /><di:waypoint x="3175" y="455" /><di:waypoint x="3175" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_30_di" bpmnElement="Flow_30"><di:waypoint x="3200" y="345" /><di:waypoint x="3300" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_31_di" bpmnElement="Flow_31"><di:waypoint x="3325" y="320" /><di:waypoint x="3325" y="105" /><di:waypoint x="3420" y="105" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_32_di" bpmnElement="Flow_32"><di:waypoint x="3530" y="105" /><di:waypoint x="3607" y="105" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_33_di" bpmnElement="Flow_33"><di:waypoint x="3350" y="345" /><di:waypoint x="3420" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_34_di" bpmnElement="Flow_34"><di:waypoint x="3530" y="345" /><di:waypoint x="3600" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_35_di" bpmnElement="Flow_35"><di:waypoint x="3650" y="345" /><di:waypoint x="3900" y="345" /><bpmndi:BPMNLabel><dc:Bounds x="3656" y="325" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_36_di" bpmnElement="Flow_36"><di:waypoint x="3625" y="370" /><di:waypoint x="3625" y="455" /><di:waypoint x="3757" y="455" /><bpmndi:BPMNLabel><dc:Bounds x="3631" y="406" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_37_di" bpmnElement="Flow_37"><di:waypoint x="3793" y="455" /><di:waypoint x="3925" y="455" /><di:waypoint x="3925" y="370" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_38_di" bpmnElement="Flow_38"><di:waypoint x="3950" y="345" /><di:waypoint x="4020" y="345" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_39_di" bpmnElement="Flow_39"><di:waypoint x="4130" y="345" /><di:waypoint x="4150" y="345" /><di:waypoint x="4150" y="945" /><di:waypoint x="4170" y="945" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_40_di" bpmnElement="Flow_40"><di:waypoint x="4280" y="945" /><di:waypoint x="4320" y="945" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_41_di" bpmnElement="Flow_41"><di:waypoint x="4430" y="945" /><di:waypoint x="4507" y="945" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_42_di" bpmnElement="Flow_42"><di:waypoint x="1720" y="527" /><di:waypoint x="1720" y="455" /><di:waypoint x="1770" y="455" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_43_di" bpmnElement="Flow_43"><di:waypoint x="1880" y="455" /><di:waypoint x="1957" y="455" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_Task_Convert_Data_XRayImage_di" bpmnElement="Assoc_Task_Convert_Data_XRayImage"><di:waypoint x="925" y="385" /><di:waypoint x="925" y="430" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_Sub_Validate_Data_Validation_di" bpmnElement="Assoc_Sub_Validate_Data_Validation"><di:waypoint x="1075" y="385" /><di:waypoint x="1075" y="430" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_Task_Heatmaps_Data_Result_di" bpmnElement="Assoc_Task_Heatmaps_Data_Result"><di:waypoint x="2425" y="625" /><di:waypoint x="2425" y="780" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_Task_SaveLocal_Store_Local_di" bpmnElement="Assoc_Task_SaveLocal_Store_Local"><di:waypoint x="3475" y="385" /><di:waypoint x="3475" y="430" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_Task_Store_Store_Server_di" bpmnElement="Assoc_Task_Store_Store_Server"><di:waypoint x="4225" y="985" /><di:waypoint x="4225" y="1010" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MessageFlow_Notify_di" bpmnElement="MessageFlow_Notify"><di:waypoint x="4375" y="985" /><di:waypoint x="4375" y="1140" /><bpmndi:BPMNLabel><dc:Bounds x="4383" y="1010" width="120" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="Diagram_Validate">
+    <bpmndi:BPMNPlane id="Plane_Validate" bpmnElement="Sub_Validate">
+      <bpmndi:BPMNShape id="Sub_Start_di" bpmnElement="Sub_Start"><dc:Bounds x="162" y="182" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sub_FileType_di" bpmnElement="Sub_FileType"><dc:Bounds x="300" y="160" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sub_FileSize_di" bpmnElement="Sub_FileSize"><dc:Bounds x="480" y="160" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sub_LooksLike_di" bpmnElement="Sub_LooksLike"><dc:Bounds x="660" y="160" width="120" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Sub_End_di" bpmnElement="Sub_End"><dc:Bounds x="882" y="182" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="842" y="223" width="116" height="27" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SubFlow_1_di" bpmnElement="SubFlow_1"><di:waypoint x="198" y="200" /><di:waypoint x="300" y="200" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubFlow_2_di" bpmnElement="SubFlow_2"><di:waypoint x="420" y="200" /><di:waypoint x="480" y="200" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubFlow_3_di" bpmnElement="SubFlow_3"><di:waypoint x="600" y="200" /><di:waypoint x="660" y="200" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubFlow_4_di" bpmnElement="SubFlow_4"><di:waypoint x="780" y="200" /><di:waypoint x="882" y="200" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
