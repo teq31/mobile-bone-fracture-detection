@@ -1,6 +1,8 @@
 package com.bonefracture.config;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class AppConfig {
 
@@ -24,7 +26,14 @@ public class AppConfig {
         return Holder.INSTANCE;
     }
     public void load(String path){
-        //TODO fill the fields using loader
+        Properties properties = loader.load(path);
+        this.defaultConfidenceThreshold = Float.parseFloat(properties.getProperty("defaultConfidenceThreshold"));
+        this.maxFileSizeBytes = Long.parseLong(properties.getProperty("maxFileSizeBytes"));
+        this.allowedFileTypes = Arrays.stream(properties.getProperty("allowedFileTypes").split(","))
+                .map(String::trim)
+                .toList();
+        this.llmApiUrl = properties.getProperty("llmApiUrl");
+        this.defaultLanguage = Language.valueOf(properties.getProperty("defaultLanguage"));
     }
     public float getDefaultConfidenceThreshold(){
         return defaultConfidenceThreshold;
