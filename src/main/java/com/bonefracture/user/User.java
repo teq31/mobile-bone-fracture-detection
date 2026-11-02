@@ -23,11 +23,11 @@ public abstract class User {
     }
 
     public void signUp(String password) {
-        // TODO hash + save
+        passwordHash = PasswordHasher.hash(password);
     }
 
     public boolean login(String password) {
-        return false;
+        return PasswordHasher.matches(password, passwordHash);
     }
 
     public XRayImage uploadXRay(File file) {
@@ -36,6 +36,10 @@ public abstract class User {
 
     public List<XRayImage> viewHistory() {
         return history;
+    }
+
+    String getPasswordHash() {
+        return passwordHash;
     }
 
     public String getName() { return name; }
