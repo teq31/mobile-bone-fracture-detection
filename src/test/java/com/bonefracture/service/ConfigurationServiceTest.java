@@ -1,5 +1,6 @@
 package com.bonefracture.service;
 
+import com.bonefracture.aspect.ServiceException;
 import com.bonefracture.config.ConfigurationException;
 import com.bonefracture.config.Language;
 import org.junit.jupiter.api.Test;
@@ -17,11 +18,13 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void loadConfiguration_throwsConfigurationException_whenFileIsMissing() {
+    void loadConfiguration_failsWithServiceException_whenFileIsMissing() {
         ConfigurationService service = new ConfigurationService();
 
-        assertThrows(ConfigurationException.class,
+        ServiceException thrown = assertThrows(ServiceException.class,
                 () -> service.loadConfiguration("config/does-not-exist.properties"));
+
+        assertInstanceOf(ConfigurationException.class, thrown.getCause());
     }
 
     @Test
