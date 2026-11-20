@@ -15,8 +15,12 @@ public class ModelRegistry {
     }
 
     public DetectionModel getMainModel() {
-        // TODO return the model with isMain() == true
-        return null;
+        for (DetectionModel model : models) {
+            if (model.isMain()) {
+                return model;
+            }
+        }
+        throw new IllegalStateException("no main model registered");
     }
 
     public List<DetectionModel> getAllModels() { return models; }
