@@ -52,6 +52,12 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- used when SPRING_DATASOURCE_URL points to PostgreSQL (docker-compose) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- AOP: AspectJ, aspects are woven at compile time (same setup as Alexandra's branch) -->
         <dependency>
