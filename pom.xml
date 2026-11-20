@@ -89,6 +89,8 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <showWeaveInfo>true</showWeaveInfo>
+                    <!-- keep parameter names, Spring needs them for @PathVariable / @RequestParam -->
+                    <parameters>true</parameters>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
                 <dependencies>

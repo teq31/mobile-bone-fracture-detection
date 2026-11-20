@@ -32,6 +32,13 @@ public class Appointment extends AbstractNotificationSubject {
         this.state = RequestedState.INSTANCE;
     }
 
+    /** Rebuilds an appointment loaded from the database, in the state it was saved in. */
+    public static Appointment restore(Doctor doctor, Patient patient, LocalDateTime dateTime, AppointmentStatus status) {
+        Appointment appointment = new Appointment(doctor, patient, dateTime);
+        appointment.setState(AppointmentState.forStatus(status));
+        return appointment;
+    }
+
     /** Delegates to the current state. */
     public void confirm() {
         state.confirm(this);
