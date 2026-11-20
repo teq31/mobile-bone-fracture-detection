@@ -28,11 +28,14 @@ public class AppointmentBookingServiceImpl implements AppointmentBookingService 
 
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
+    private final DatabaseNotificationObserver databaseNotificationObserver;
     private final AppointmentService appointmentService = new AppointmentServiceImpl();
 
-    public AppointmentBookingServiceImpl(AppointmentRepository appointmentRepository, UserRepository userRepository) {
+    public AppointmentBookingServiceImpl(AppointmentRepository appointmentRepository, UserRepository userRepository,
+                                         DatabaseNotificationObserver databaseNotificationObserver) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
+        this.databaseNotificationObserver = databaseNotificationObserver;
     }
 
     @Override
@@ -87,10 +90,15 @@ public class AppointmentBookingServiceImpl implements AppointmentBookingService 
         return appointmentRepository.findByPatientIdOrderByDateTime(userId);
     }
 
-    /** Runs the action on the domain appointment (STATE pattern) and saves the resulting status. */
+    /**
+     * Runs the action on the domain appointment (STATE pattern) and saves the resulting status.
+     * The database observer is attached (OBSERVER pattern); NotificationAspect (AOP) sends it the
+     * notification after a successful action.
+     */
     private AppointmentEntity apply(AppointmentEntity entity, Consumer<Appointment> action) {
         Appointment appointment = Appointment.restore(toDoctor(entity.getDoctor()), toPatient(entity.getPatient()),
                 entity.getDateTime(), entity.getStatus());
+        appointment.attach(databaseNotificationObserver);
         action.accept(appointment);
         entity.setStatus(appointment.getStatus());
         return entity;

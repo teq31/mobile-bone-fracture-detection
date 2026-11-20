@@ -36,7 +36,7 @@ public class Notification {
     }
 
     public String getMessage() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return message;
     }
 
     public LocalDateTime getCreatedAt() {

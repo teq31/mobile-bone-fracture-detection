@@ -4,6 +4,7 @@ import com.bonefracture.auth.EmailAlreadyUsedException;
 import com.bonefracture.auth.InvalidCredentialsException;
 import com.bonefracture.booking.AppointmentNotFoundException;
 import com.bonefracture.booking.NotAllowedException;
+import com.bonefracture.booking.NotificationNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(AppointmentNotFoundException.class)
-    public ProblemDetail notFound(AppointmentNotFoundException e) {
+    @ExceptionHandler({AppointmentNotFoundException.class, NotificationNotFoundException.class})
+    public ProblemDetail notFound(RuntimeException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
