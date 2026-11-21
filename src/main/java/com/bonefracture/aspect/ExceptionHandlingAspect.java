@@ -13,6 +13,10 @@ public class ExceptionHandlingAspect {
     public void serviceMethods() {
     }
 
+    @Pointcut("execution(* com.bonefracture.api..*Controller.*(..))")
+    public void controllerMethods() {
+    }
+
     @Around("serviceMethods()")
     public Object handleServiceErrors(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
@@ -22,6 +26,28 @@ public class ExceptionHandlingAspect {
         } catch (Throwable error) {
             throw new ServiceException(operationName(joinPoint), buildMessage(joinPoint, error), error);
         }
+    }
+
+    @Around("controllerMethods()")
+    public Object handleControllerErrors(ProceedingJoinPoint joinPoint) throws Throwable {
+        try {
+            return joinPoint.proceed();
+        } catch (Throwable error) {
+            if (isHandledElsewhere(error)) {
+                throw error;
+            }
+            throw new ServiceException(operationName(joinPoint), buildMessage(joinPoint, error), error);
+        }
+    }
+
+    private boolean isHandledElsewhere(Throwable error) {
+        if (error instanceof ServiceException) {
+            return true;
+        }
+        String type = error.getClass().getName();
+        return type.startsWith("org.springframework.")
+                || error instanceof IllegalArgumentException
+                || error instanceof IllegalStateException;
     }
 
     private String operationName(ProceedingJoinPoint joinPoint) {
