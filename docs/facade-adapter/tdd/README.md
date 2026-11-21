@@ -59,7 +59,7 @@ skeleton (`toXRayImage()` returned `null` and nothing was checked).
 They were moved into a package-private helper, `AdapterSupport` (`requireBodyPart()`, `siblingFile()`,
 `savePng()`). The adapters lost 32 lines and gained 7; the 12 tests still pass.
 
-Commits: `b5058f9` (steps 1-2), `d58ca29` (steps 3-4), `ce3f950` (step 5).
+Commits: `5f9ed84` (steps 1-2), `758aec4` (steps 3-4), `92cdfff` (step 5).
 
 ## Iteration 2: the facade and XRayAnalysisService
 
@@ -98,4 +98,11 @@ the main model; a doctor verified by an administrator can compare every model. T
 private methods: `convertAndValidate()`, `preprocess()` and `runModel()` (model + detection + heatmaps).
 The two public methods now read as a list of steps; the 22 tests still pass.
 
-Commits: `6136d74` (steps 1-2), `ee27a9b` (steps 3-4), `a72c98f` (step 5).
+Commits: `231a837` (steps 1-2), `8267919` (steps 3-4), `2d85084` (step 5).
+
+## After the rebase on main (lab 7)
+
+The branch was rebased on `main` after Ianis's lab 5 work was merged, so the commit hashes above are the
+new ones. Ianis changed `ModelRegistry.getMainModel()` to throw `IllegalStateException` when no model is
+marked as main; commit `f3fcb2e` adapts the facade and the test "without a main model" to it.
+All 39 tests in the project pass (22 of them from this branch).
