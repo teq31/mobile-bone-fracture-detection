@@ -45,10 +45,7 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
     @Override
     public AnalysisResult analyzeXRay(User user, XRayImageSource source, BodyPart bodyPart) {
         XRayImage image = convertAndValidate(source, bodyPart);
-        DetectionModel mainModel = modelRegistry.getMainModel();
-        if (mainModel == null) {
-            throw new IllegalStateException("No main detection model is registered");
-        }
+        DetectionModel mainModel = modelRegistry.getMainModel(); // throws IllegalStateException if there is none
 
         AnalysisResult result = runModel(mainModel, preprocess(image));
 

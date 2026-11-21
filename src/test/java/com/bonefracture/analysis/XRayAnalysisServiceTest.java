@@ -138,7 +138,10 @@ class XRayAnalysisServiceTest {
     void analyzeXRayWithoutMainModelThrows() {
         ModelRegistry noMainModel = new ModelRegistry();
         noMainModel.register(secondModel);
-        XRayAnalysisService serviceWithoutMain = createService(noMainModel);
+        // ModelRegistry.getMainModel() throws when no model is marked as main (Ianis, lab 5),
+        // so the detector is created with another model and the facade must still refuse to analyze.
+        XRayAnalysisService serviceWithoutMain = new FractureAnalysisFacade(new RecordingPreprocessor(steps),
+                noMainModel, new FractureDetector(secondModel), heatmapGenerator, new HistoryRepository());
 
         assertThrows(IllegalStateException.class,
                 () -> serviceWithoutMain.analyzeXRay(student, source, BodyPart.WRIST));
