@@ -1,16 +1,17 @@
-# api package
+# api package (Alexandra's analysis endpoints)
 
-Skeleton for Alexandra's analysis API (empty placeholders, no implementation).
+AnalysisController exposes:
 
-These types stay plain and empty until Federica adds the Spring Boot skeleton.
-After that:
+- `POST /api/analyses` - run the main-model detection on an uploaded image.
+- `GET /api/analyses/history` - past analyses for the current user.
+- `GET /api/analyses/{id}/comparison` - run every model and return the
+  per-finding agreement (ModelComparisonService).
 
-- `AnalysisController` becomes a Spring `@RestController` wiring the endpoints in
-  `docs/api/api-contract.md` to `FractureAnalysisFacade` and
-  `ModelComparisonService`.
-- the `dto` classes get their fields (and any JSON annotations).
-- `LoggingAspect` and `ExceptionHandlingAspect` are applied across the
-  controllers.
+Bean wiring for the analysis stack lives in `api/config/AnalysisBeansConfig`.
 
-Nothing here should be implemented before the Spring Boot backend exists, to
-avoid duplicating Federica's work.
+Depends on teammates' work that is still stubbed:
+
+- `FractureAnalysisFacade.analyzeXRay` / `getHistory` and the detection models'
+  `detect(...)` are Teodora's / Ianis's TODOs. Until those are done, the
+  detection and history responses come back empty. The endpoints, wiring,
+  DTOs and comparison flow are complete on this side.

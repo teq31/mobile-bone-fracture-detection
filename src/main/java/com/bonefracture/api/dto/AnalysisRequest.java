@@ -1,5 +1,7 @@
 package com.bonefracture.api.dto;
 
-// TODO: request payload for POST /api/analyses (image, bodyPart, source).
-public class AnalysisRequest {
+import com.bonefracture.xray.BodyPart;
+import jakarta.validation.constraints.NotNull;
+
+public record AnalysisRequest(@NotNull BodyPart bodyPart) {
 }
