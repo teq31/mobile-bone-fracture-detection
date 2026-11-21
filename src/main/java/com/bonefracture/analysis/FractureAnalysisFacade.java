@@ -1,6 +1,8 @@
 package com.bonefracture.analysis;
 
+import com.bonefracture.cache.Cached;
 import com.bonefracture.detection.AnalysisResult;
+import com.bonefracture.detection.DetectionModel;
 import com.bonefracture.detection.FractureDetector;
 import com.bonefracture.detection.HeatmapGenerator;
 import com.bonefracture.detection.ModelRegistry;
@@ -48,8 +50,19 @@ public class FractureAnalysisFacade {
 
     // Doctor: the same X-ray analyzed by every available model
     public List<AnalysisResult> compareModels(Doctor doctor, XRayImageSource source, BodyPart bodyPart) {
-        // TODO
-        return new ArrayList<>();
+        // TODO validate -> preprocess -> heatmap -> save to history
+        return compareModels(source.toXRayImage(bodyPart));
+    }
+
+    // The comparison is cached by the content hash of the X-ray (CachingAspect, @Cached),
+    // so the same X-ray is compared only once in 10 minutes.
+    @Cached(name = "model-comparison", ttlSeconds = 600, maxEntries = 100)
+    public List<AnalysisResult> compareModels(XRayImage image) {
+        List<AnalysisResult> results = new ArrayList<>();
+        for (DetectionModel model : modelRegistry.getAllModels()) {
+            results.add(model.detect(image));
+        }
+        return List.copyOf(results);
     }
 
     public List<XRayImage> getHistory(User user) {
