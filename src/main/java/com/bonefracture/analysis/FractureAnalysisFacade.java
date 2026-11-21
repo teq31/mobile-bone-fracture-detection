@@ -48,6 +48,7 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         DetectionModel mainModel = modelRegistry.getMainModel(); // throws IllegalStateException if there is none
 
         AnalysisResult result = runModel(mainModel, preprocess(image));
+        keepOnOriginal(image, result);
 
         historyRepository.save(user, image);
         return result;
@@ -63,7 +64,9 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
 
         List<AnalysisResult> results = new ArrayList<>();
         for (DetectionModel model : modelRegistry.getAllModels()) {
-            results.add(runModel(model, prepared));
+            AnalysisResult result = runModel(model, prepared);
+            keepOnOriginal(image, result);
+            results.add(result);
         }
 
         historyRepository.save(doctor, image);
@@ -87,6 +90,13 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
 
     private XRayImage preprocess(XRayImage image) {
         return preprocessor.normalize(preprocessor.resize(image));
+    }
+
+    // The detector stores the result on the preprocessed image; the history keeps the uploaded one
+    private void keepOnOriginal(XRayImage original, AnalysisResult result) {
+        if (!original.getResults().contains(result)) {
+            original.addResult(result);
+        }
     }
 
     private AnalysisResult runModel(DetectionModel model, XRayImage prepared) {

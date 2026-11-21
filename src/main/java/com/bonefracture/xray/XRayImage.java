@@ -42,6 +42,7 @@ public class XRayImage {
     public String getPath() { return path; }
     public FileFormat getFormat() { return format; }
     public BodyPart getBodyPart() { return bodyPart; }
+    public boolean isTakenWithCamera() { return takenWithCamera; }
     public LocalDateTime getUploadDate() {
         return uploadDate;
     }
