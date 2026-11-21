@@ -24,4 +24,8 @@ public class Detection {
     public Heatmap getHeatmap() {
         return heatmap;
     }
+
+    public void setHeatmap(Heatmap heatmap) {
+        this.heatmap = heatmap;
+    }
 }
