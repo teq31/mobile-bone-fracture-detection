@@ -1,0 +1,34 @@
+# Skeleton only - values and services to be completed once the Spring Boot
+# backend exists (Federica's task). Do not treat as final.
+
+services:
+  backend:
+    # TODO: build the Spring Boot backend image (see Dockerfile)
+    # build: .
+    # ports:
+    #   - "8080:8080"
+    # environment:
+    #   - SPRING_DATASOURCE_URL=${DB_URL}
+    #   - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+    #   - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    # depends_on:
+    #   - db
+    profiles:
+      - skeleton
+
+  db:
+    # TODO: PostgreSQL database
+    # image: postgres:16
+    # ports:
+    #   - "5432:5432"
+    # environment:
+    #   - POSTGRES_DB=${DB_NAME}
+    #   - POSTGRES_USER=${DB_USERNAME}
+    #   - POSTGRES_PASSWORD=${DB_PASSWORD}
+    # volumes:
+    #   - db-data:/var/lib/postgresql/data
+    profiles:
+      - skeleton
+
+# volumes:
+#   db-data:
