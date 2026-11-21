@@ -147,6 +147,18 @@ class XRayAnalysisServiceTest {
                 () -> serviceWithoutMain.analyzeXRay(student, source, BodyPart.WRIST));
     }
 
+    @Test
+    void analyzeXRayKeepsResultOnOriginalXRayWhenPreprocessingCreatesNewImage() {
+        XRayImage prepared = new XRayImage(image.getPath(), FileFormat.PNG, BodyPart.WRIST, false);
+        XRayAnalysisService realisticService = new FractureAnalysisFacade(new CopyingPreprocessor(prepared), registry,
+                new FractureDetector(mainModel), heatmapGenerator, new HistoryRepository());
+
+        AnalysisResult result = realisticService.analyzeXRay(student, source, BodyPart.WRIST);
+
+        assertTrue(image.getResults().contains(result), "the X-ray in the history shows the result");
+        assertTrue(prepared.getResults().contains(result));
+    }
+
     // ---- compareModels: verified doctors only, every model
 
     @Test
@@ -238,6 +250,19 @@ class XRayAnalysisServiceTest {
             steps.add("normalize");
             return xray;
         }
+    }
+
+    /** Preprocessor that returns a new image, like the real one (which saves resized / normalized copies). */
+    private static class CopyingPreprocessor extends ImagePreprocessor {
+        private final XRayImage prepared;
+
+        CopyingPreprocessor(XRayImage prepared) { this.prepared = prepared; }
+
+        @Override
+        public XRayImage resize(XRayImage xray) { return prepared; }
+
+        @Override
+        public XRayImage normalize(XRayImage xray) { return xray; }
     }
 
     /** Heatmap generator that counts the calls. */
