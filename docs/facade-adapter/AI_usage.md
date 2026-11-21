@@ -25,3 +25,27 @@ so they run without the real PDF / DICOM libraries and without the AI model.
 **Disadvantages:** the AI cannot run IntelliJ, so every step had to be checked and documented manually;
 the tests were written against the existing Lab 4 classes, so some small additions (getters,
 `Detection.setHeatmap()`) were needed in the teammates' classes.
+
+
+# Use of AI Tools - Labs 6-7 (working pipeline and AOP)
+
+**Tool:** Claude Opus 5.5 (Anthropic), via claude.ai, with read-only access to the team GitHub repository.
+
+**Prompts** (translated from Romanian):
+1. *(with the Lab06 sheet)* "How should we split this between 4 people?" and then "we have not presented for
+   2-3 weeks and I want real progress", which led to the split: the ML model (Ianis), the Spring Boot backend
+   (Federica), the analysis API and infrastructure (Alexandra), the Flutter app and the X-ray analysis
+   pipeline with its aspect (Teodora).
+2. *(with the Lab 7 sheet)* "Do my part, look at Federica's branch to see what she already added, work in
+   several commits, tell me when to push, and rebase on what is now on main."
+
+**How the result was used:**
+- The AI rebased the branch on `main`, adapted the facade to Ianis's `ModelRegistry`, then wrote the tests first
+  (`test:` commits) and the code after them (`feat:` commits) for the preprocessing, the heatmaps and the aspect.
+- The AspectJ setup in `pom.xml` copies the one on Federica's and Alexandra's branches.
+- I ran `mvn test` in IntelliJ (the aspect is only woven by Maven), checked the build log for the woven join
+  points and pushed the branch myself.
+
+**Advantages:** the aspect is small and reusable, and the pipeline now works on real images, so the backend can
+call it directly. **Disadvantages:** the AI could not run Maven, so the woven aspect test had to be checked locally;
+the heatmap is box-based until the model exposes its activations.
