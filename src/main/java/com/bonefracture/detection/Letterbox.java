@@ -2,6 +2,7 @@ package com.bonefracture.detection;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.util.Arrays;
 
@@ -72,7 +73,8 @@ final class Letterbox {
         int height = image.getHeight();
         float[][] rgb = new float[3][width * height];
         Raster raster = image.getRaster();
-        if (raster.getNumBands() == 1) {
+        // palette images also have one band, but it holds colour indexes: those go through getRGB
+        if (raster.getNumBands() == 1 && !(image.getColorModel() instanceof IndexColorModel)) {
             int shift = Math.max(0, raster.getSampleModel().getSampleSize(0) - 8);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
