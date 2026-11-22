@@ -17,10 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Lab 7 - HeatmapGenerator: a heatmap the size of the X-ray, strongest in the centre of the detection
- * and fading outside it, so the app can draw it over the image.
- */
 class HeatmapGeneratorTest {
 
     private XRayImage xray;

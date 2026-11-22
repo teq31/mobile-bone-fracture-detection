@@ -16,10 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * TDD Iteration 1 - ADAPTER pattern: a page of a PDF document -> XRayImage (PNG).
- * FakePdfDocument stands in for the external PDF library (the Adaptee).
- */
 class PdfXRayAdapterTest {
 
     private File folder;
@@ -62,7 +58,7 @@ class PdfXRayAdapterTest {
         assertThrows(IllegalArgumentException.class, () -> new PdfXRayAdapter(pdf, 5));
     }
 
-    /** Test double for the external PDF library. */
+    // fake pdf lib
     private static class FakePdfDocument extends PdfDocument {
 
         private final int pages;

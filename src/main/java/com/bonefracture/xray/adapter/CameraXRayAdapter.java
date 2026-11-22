@@ -10,8 +10,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 
-// Adapter pattern - Adapter
-// Converts a photo of an X-ray taken with the phone camera into an XRayImage (saved as JPG).
+// Adapter - camera photo -> XRayImage
 public class CameraXRayAdapter implements XRayImageSource {
 
     private static final DateTimeFormatter FILE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");

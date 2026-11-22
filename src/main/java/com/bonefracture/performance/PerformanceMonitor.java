@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-// Keeps the durations measured by PerformanceMonitoringAspect, per operation ("ClassName.method").
-// Static, because the aspect is created by AspectJ, not by our code. Thread safe: the backend analyses
-// several X-rays at the same time.
+// static because AspectJ creates the aspect, not us
 public final class PerformanceMonitor {
 
     private static final double NANOS_PER_MILLI = 1_000_000.0;
@@ -28,7 +26,7 @@ public final class PerformanceMonitor {
         return counter == null ? Optional.empty() : Optional.of(counter.snapshot(operation));
     }
 
-    // Slowest operations (by average) first
+    // slowest first
     public static List<OperationStats> all() {
         List<OperationStats> stats = new ArrayList<>();
         COUNTERS.forEach((operation, counter) -> stats.add(counter.snapshot(operation)));

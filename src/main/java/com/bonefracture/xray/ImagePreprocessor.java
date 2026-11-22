@@ -9,19 +9,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-// Facade pattern - subsystem class
-// Prepares an image for the detection model. Every step saves a new PNG next to the original
-// ("wrist.png" -> "wrist-resized.png" -> "wrist-resized-normalized.png") and returns it as a new XRayImage,
-// so the uploaded X-ray is never changed.
+// Facade - subsystem. each step writes a new png, the uploaded file stays untouched
 public class ImagePreprocessor {
 
-    // 1st and 99th percentile: a few very dark or very bright pixels (labels, burned edges) do not decide the contrast
+    // ignore labels / burned edges when stretching
     private static final double LOW_PERCENTILE = 0.01;
     private static final double HIGH_PERCENTILE = 0.99;
 
     private int targetSize = 640;
 
-    // Grey scale, longest side = targetSize (the input size of the YOLO model), aspect ratio kept
+    // 640 = yolo input size
     public XRayImage resize(XRayImage image) {
         BufferedImage source = read(image);
         double scale = (double) targetSize / Math.max(source.getWidth(), source.getHeight());
@@ -38,7 +35,6 @@ public class ImagePreprocessor {
         return save(resized, image, "-resized");
     }
 
-    // Contrast stretching: the darkest pixels become 0 and the brightest 255
     public XRayImage normalize(XRayImage image) {
         BufferedImage grey = toGrey(read(image));
         WritableRaster raster = grey.getRaster();

@@ -16,9 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * TDD Iteration 1 - ADAPTER pattern: a photo taken with the phone camera -> XRayImage (JPG).
- */
 class CameraXRayAdapterTest {
 
     private File saveDirectory;

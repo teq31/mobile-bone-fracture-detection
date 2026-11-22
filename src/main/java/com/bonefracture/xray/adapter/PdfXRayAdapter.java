@@ -7,8 +7,7 @@ import com.bonefracture.xray.XRayImage;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-// Adapter pattern - Adapter
-// Converts a page of a PDF document into an XRayImage (saved as PNG next to the PDF).
+// Adapter - pdf page -> XRayImage
 public class PdfXRayAdapter implements XRayImageSource {
 
     private static final int RENDER_DPI = 300;

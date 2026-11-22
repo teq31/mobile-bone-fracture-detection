@@ -8,8 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// Facade pattern - subsystem class
-// Saves and loads the X-ray history of a user (kept in memory for now; later SQLite / PostgreSQL).
+// Facade - subsystem. in memory for now, move to the db later
 public class HistoryRepository {
 
     private Map<User, List<XRayImage>> historyByUser = new HashMap<>();

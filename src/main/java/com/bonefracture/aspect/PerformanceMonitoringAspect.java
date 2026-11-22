@@ -9,15 +9,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * AOP - performance monitoring of the X-ray analysis (Teodora, Lab 6 Problem 1 / Lab 7).
- *
- * Measures how long every step of an analysis takes, without timing code in the classes themselves:
- * the facade (XRayAnalysisService), the adapters, the preprocessing, the detection models and the heatmaps.
- * Each call is recorded in PerformanceMonitor as "ClassName.method" (calls, failures, average, min, max);
- * a call slower than the threshold (2 s by default) is logged as a warning.
- * Exceptions are counted as failures and thrown again unchanged.
- */
+// AOP - times every step of the analysis, results in PerformanceMonitor
+// (slow calls > 2s get a warning in the log)
 @Aspect
 public class PerformanceMonitoringAspect {
 
@@ -65,7 +58,7 @@ public class PerformanceMonitoringAspect {
         }
     }
 
-    // "YoloModel.detect": the class of the object that did the work, not the interface
+    // e.g. "YoloModel.detect" (real class, not the interface)
     private static String operationName(ProceedingJoinPoint joinPoint) {
         Object target = joinPoint.getTarget();
         String type = target != null ? target.getClass().getSimpleName()

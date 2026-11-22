@@ -9,16 +9,13 @@ import com.bonefracture.xray.adapter.XRayImageSource;
 
 import java.util.List;
 
-/**
- * SOA: service for analysing X-rays. The app screens (and later the REST API) use only this interface.
- * Implemented by FractureAnalysisFacade (FACADE pattern).
- */
+// SOA - the API / app only talk to this, impl is FractureAnalysisFacade
 public interface XRayAnalysisService {
 
-    // Student and Patient: one analysis with the main model
+    // student / patient -> main model only
     AnalysisResult analyzeXRay(User user, XRayImageSource source, BodyPart bodyPart);
 
-    // Verified Doctor: the same X-ray analysed by every available model
+    // verified doctor -> all models
     List<AnalysisResult> compareModels(Doctor doctor, XRayImageSource source, BodyPart bodyPart);
 
     List<XRayImage> getHistory(User user);

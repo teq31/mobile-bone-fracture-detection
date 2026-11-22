@@ -9,10 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Lab 6/7 - the statistics behind PerformanceMonitoringAspect: how many times each step of the analysis ran,
- * how long it took (average, min, max) and how many times it failed.
- */
 class PerformanceMonitorTest {
 
     private static final long MS = 1_000_000L;

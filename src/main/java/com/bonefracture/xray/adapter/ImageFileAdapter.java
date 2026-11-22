@@ -6,7 +6,7 @@ import com.bonefracture.xray.XRayImage;
 
 import java.io.File;
 
-// Adapter pattern - Adapter for plain image files (JPG / PNG)
+// Adapter - jpg / png
 public class ImageFileAdapter implements XRayImageSource {
 
     private File file;

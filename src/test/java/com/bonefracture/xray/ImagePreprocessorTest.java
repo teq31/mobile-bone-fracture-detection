@@ -13,10 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Lab 7 - ImagePreprocessor: the real preprocessing before detection
- * (resize so the longest side is 640 px, grey scale, contrast stretching).
- */
 class ImagePreprocessorTest {
 
     private File folder;

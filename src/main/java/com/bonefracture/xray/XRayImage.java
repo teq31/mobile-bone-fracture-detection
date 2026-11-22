@@ -24,7 +24,6 @@ public class XRayImage {
         this.uploadDate = LocalDateTime.now();
     }
 
-    // Basic checks before analysis: the file exists and is not empty, the format and body part are known
     public boolean validate() {
         if (path == null || path.isBlank() || format == null || bodyPart == null) {
             return false;

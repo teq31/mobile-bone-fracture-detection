@@ -3,9 +3,7 @@ package com.bonefracture.xray.adapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-// Adapter pattern - Adaptee
-// Stands for an external PDF library (e.g. Apache PDFBox), which has its own interface:
-// it works with pages, not with X-ray images.
+// Adaptee - placeholder for PDFBox
 public class PdfDocument {
 
     private File file;

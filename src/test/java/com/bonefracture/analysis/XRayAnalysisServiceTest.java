@@ -33,11 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * TDD Iteration 2 - FACADE pattern + SOA: XRayAnalysisService.
- * FractureAnalysisFacade is the single entry point for analysing an X-ray; the subsystems
- * (preprocessor, models, heatmap generator, history) are replaced by small test doubles.
- */
+// tdd it. 2 - facade + XRayAnalysisService, subsystems are fakes
 class XRayAnalysisServiceTest {
 
     private final List<String> steps = new ArrayList<>();
@@ -79,8 +75,6 @@ class XRayAnalysisServiceTest {
         return new FractureAnalysisFacade(new RecordingPreprocessor(steps), models,
                 new FractureDetector(models.getMainModel()), heatmapGenerator, new HistoryRepository());
     }
-
-    // ---- analyzeXRay: Student and Patient, main model only
 
     @Test
     void analyzeXRayUsesMainModel() {
@@ -138,8 +132,7 @@ class XRayAnalysisServiceTest {
     void analyzeXRayWithoutMainModelThrows() {
         ModelRegistry noMainModel = new ModelRegistry();
         noMainModel.register(secondModel);
-        // ModelRegistry.getMainModel() throws when no model is marked as main (Ianis, lab 5),
-        // so the detector is created with another model and the facade must still refuse to analyze.
+        // getMainModel() throws now (Ianis), so build the detector with another model
         XRayAnalysisService serviceWithoutMain = new FractureAnalysisFacade(new RecordingPreprocessor(steps),
                 noMainModel, new FractureDetector(secondModel), heatmapGenerator, new HistoryRepository());
 
@@ -158,8 +151,6 @@ class XRayAnalysisServiceTest {
         assertTrue(image.getResults().contains(result), "the X-ray in the history shows the result");
         assertTrue(prepared.getResults().contains(result));
     }
-
-    // ---- compareModels: verified doctors only, every model
 
     @Test
     void compareModelsRunsEveryModelForVerifiedDoctor() {
@@ -189,9 +180,8 @@ class XRayAnalysisServiceTest {
         assertTrue(service.getHistory(student).isEmpty());
     }
 
-    // ---- test doubles for the subsystems
+    // fakes
 
-    /** Adapter that always returns the same image and remembers the requested body part. */
     private static class FakeSource implements XRayImageSource {
         private final XRayImage image;
         private BodyPart requestedBodyPart;
@@ -211,7 +201,6 @@ class XRayAnalysisServiceTest {
         public boolean isTakenWithCamera() { return false; }
     }
 
-    /** Detection model that returns a fixed number of detections and records each call. */
     private static class FakeModel extends DetectionModel {
         private final int detections;
         private final List<String> steps;
@@ -233,7 +222,6 @@ class XRayAnalysisServiceTest {
         }
     }
 
-    /** Preprocessor that records the steps and returns the image unchanged. */
     private static class RecordingPreprocessor extends ImagePreprocessor {
         private final List<String> steps;
 
@@ -252,7 +240,7 @@ class XRayAnalysisServiceTest {
         }
     }
 
-    /** Preprocessor that returns a new image, like the real one (which saves resized / normalized copies). */
+    // returns a new image, like the real preprocessor
     private static class CopyingPreprocessor extends ImagePreprocessor {
         private final XRayImage prepared;
 
@@ -265,7 +253,6 @@ class XRayAnalysisServiceTest {
         public XRayImage normalize(XRayImage xray) { return xray; }
     }
 
-    /** Heatmap generator that counts the calls. */
     private static class FakeHeatmapGenerator extends HeatmapGenerator {
         private int calls;
 

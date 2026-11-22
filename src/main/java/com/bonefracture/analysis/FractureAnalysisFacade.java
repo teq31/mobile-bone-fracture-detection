@@ -17,11 +17,7 @@ import com.bonefracture.xray.adapter.XRayImageSource;
 import java.util.ArrayList;
 import java.util.List;
 
-// Facade pattern - Facade
-// One simple entry point for the app screens. It hides the steps of an analysis:
-// adapting the input (Adapter), validation, preprocessing, choosing the model,
-// detection (Strategy, through FractureDetector), heatmap and saving to history.
-// SOA: it is the implementation of XRayAnalysisService.
+// Facade - single entry point for an analysis (also the XRayAnalysisService impl)
 public class FractureAnalysisFacade implements XRayAnalysisService {
 
     private ImagePreprocessor preprocessor;
@@ -78,7 +74,7 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         return historyRepository.findByUser(user);
     }
 
-    // ---- steps shared by analyzeXRay and compareModels (TDD iteration 2, step 5 - refactor)
+    // shared steps (refactor, tdd it. 2)
 
     private XRayImage convertAndValidate(XRayImageSource source, BodyPart bodyPart) {
         XRayImage image = source.toXRayImage(bodyPart);
@@ -92,7 +88,7 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         return preprocessor.normalize(preprocessor.resize(image));
     }
 
-    // The detector stores the result on the preprocessed image; the history keeps the uploaded one
+    // detector saves the result on the resized copy, history needs it on the original
     private void keepOnOriginal(XRayImage original, AnalysisResult result) {
         if (!original.getResults().contains(result)) {
             original.addResult(result);

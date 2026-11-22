@@ -16,10 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * TDD Iteration 1 - ADAPTER pattern: a DICOM file (16-bit pixels + metadata) -> XRayImage (8-bit PNG).
- * FakeDicomFile stands in for the external DICOM library (the Adaptee).
- */
 class DicomXRayAdapterTest {
 
     private File folder;
@@ -68,7 +64,7 @@ class DicomXRayAdapterTest {
         assertThrows(IllegalArgumentException.class, () -> source.toXRayImage(null));
     }
 
-    /** Test double for the external DICOM library. */
+    // fake dicom lib
     private static class FakeDicomFile extends DicomFile {
 
         private final String bodyPart;

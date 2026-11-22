@@ -14,9 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * TDD Iteration 1 - ADAPTER pattern: plain image files (JPG / PNG) -> XRayImage.
- */
 class ImageFileAdapterTest {
 
     private File jpgFile;

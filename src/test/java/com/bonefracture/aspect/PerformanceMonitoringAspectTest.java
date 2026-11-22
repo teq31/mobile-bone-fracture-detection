@@ -27,11 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Lab 6/7 - PerformanceMonitoringAspect (AOP): every step of an analysis is timed without a single line of
- * timing code in the facade, the adapters, the preprocessor, the models or the heatmap generator.
- * Only real (main) classes are used, because the aspect is woven into them at compile time.
- */
+// only real classes here, the aspect is woven into main code (needs mvn test)
 class PerformanceMonitoringAspectTest {
 
     private XRayAnalysisService service;
@@ -51,7 +47,7 @@ class PerformanceMonitoringAspectTest {
                 new HeatmapGenerator(), new HistoryRepository());
     }
 
-    // a different picture in every test, so a cache in front of the model never answers instead of it
+    // new image each time so the cache doesn't answer instead of the model
     private File xrayFile() throws IOException {
         BufferedImage pixels = new BufferedImage(320, 240, BufferedImage.TYPE_BYTE_GRAY);
         pixels.getRaster().setSample(0, 0, 0, (int) (System.nanoTime() % 256));

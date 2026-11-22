@@ -8,8 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-// Shared helper for the adapters (TDD iteration 1, step 5 - refactor).
-// The checks and the PNG saving were repeated in several adapters.
+// stuff the adapters had in common (refactor, tdd it. 1)
 final class AdapterSupport {
 
     private AdapterSupport() {
@@ -21,7 +20,7 @@ final class AdapterSupport {
         }
     }
 
-    // "scan.pdf" + "-page1.png" -> "scan-page1.png", in the same folder as the source file
+    // scan.pdf -> scan-page1.png
     static File siblingFile(File source, String extensionToDrop, String newSuffix) {
         String baseName = source.getName().replaceFirst("(?i)\\." + extensionToDrop + "$", "");
         return new File(source.getParentFile(), baseName + newSuffix);

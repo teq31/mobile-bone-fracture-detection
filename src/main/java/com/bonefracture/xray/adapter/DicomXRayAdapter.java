@@ -8,9 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 
-// Adapter pattern - Adapter
-// Converts a DICOM file (the format used in hospitals) into an XRayImage (8-bit PNG next to the file).
-// Only the pixels and the body part are used: patient identifiers are never copied.
+// Adapter - dicom -> XRayImage. we don't copy the patient id on purpose
 public class DicomXRayAdapter implements XRayImageSource {
 
     private DicomFile dicom;
@@ -30,7 +28,7 @@ public class DicomXRayAdapter implements XRayImageSource {
             throw new IllegalArgumentException("The DICOM pixel data does not match the image size");
         }
 
-        // 16-bit -> 8-bit: stretch the darkest pixel to 0 and the brightest to 255
+        // 16 bit -> 8 bit
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
         for (short pixel : pixels) {

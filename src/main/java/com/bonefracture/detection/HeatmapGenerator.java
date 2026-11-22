@@ -8,11 +8,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-// Facade pattern - subsystem class
-// Builds the heatmap that explains a detection (visual justification): a transparent image the size of the
-// X-ray, red in the centre of the detection and fading to blue and then to nothing around it.
-// The intensity follows the model's confidence. The models do not expose their internal activations yet,
-// so this is a box-based heatmap; EigenCAM can replace the "heat" function once the ONNX model is in place.
+// Facade - subsystem
+// box-based heatmap for now, swap for EigenCAM once we have the onnx model
 public class HeatmapGenerator {
 
     private static final int MAX_ALPHA = 180;           // the X-ray stays visible under the heatmap
@@ -48,7 +45,7 @@ public class HeatmapGenerator {
 
     public String getMethod() { return method; }
 
-    // Blue (cold) -> green -> red (hot), like the usual "jet" colour map
+    // jet colormap: blue -> green -> red
     private static int colour(double heat) {
         int red = (int) Math.round(255 * clamp(1.5 - Math.abs(4 * heat - 3)));
         int green = (int) Math.round(255 * clamp(1.5 - Math.abs(4 * heat - 2)));
