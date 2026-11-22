@@ -1,9 +1,11 @@
 package com.bonefracture.api.config;
 
+import com.bonefracture.detection.DetectionModel;
 import com.bonefracture.detection.FractureDetector;
 import com.bonefracture.detection.HeatmapGenerator;
 import com.bonefracture.detection.ModelRegistry;
 import com.bonefracture.detection.YoloModel;
+import com.bonefracture.detection.YoloOnnxModel;
 import com.bonefracture.detection.RfDetrModel;
 import com.bonefracture.history.HistoryRepository;
 import com.bonefracture.analysis.FractureAnalysisFacade;
@@ -38,13 +40,15 @@ public class AnalysisBeansConfig {
     }
 
     @Bean
-    public ModelRegistry modelRegistry(@Value("${app.analysis.yolo-weights:models/yolo.onnx}") String yoloWeights,
+    public ModelRegistry modelRegistry(@Value("${app.analysis.yolo-weights:models/yolov8-fracture.onnx}") String yoloWeights,
                                        @Value("${app.analysis.yolo-version:v8}") String yoloVersion,
                                        @Value("${app.analysis.rfdetr-weights:models/rfdetr.onnx}") String rfDetrWeights,
                                        @Value("${app.analysis.rfdetr-version:r50}") String rfDetrVersion,
                                        @Value("${app.analysis.rfdetr-backbone:resnet50}") String rfDetrBackbone) {
         ModelRegistry registry = new ModelRegistry();
-        YoloModel yolo = new YoloModel(yoloVersion, yoloWeights);
+        // the real model once ml/export_onnx.py has created the file, otherwise the placeholder
+        YoloOnnxModel onnx = new YoloOnnxModel(yoloVersion, yoloWeights);
+        DetectionModel yolo = onnx.isAvailable() ? onnx : new YoloModel(yoloVersion, yoloWeights);
         yolo.setMain(true);
         registry.register(yolo);
         registry.register(new RfDetrModel(rfDetrVersion, rfDetrWeights, rfDetrBackbone));
