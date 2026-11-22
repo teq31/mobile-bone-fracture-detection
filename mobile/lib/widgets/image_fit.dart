@@ -3,8 +3,7 @@ import 'dart:ui';
 
 import '../models/analysis.dart';
 
-/// Where an image of [imageSize] is drawn inside [area] with BoxFit.contain (centred),
-/// and where a box from the image's pixels lands on the screen.
+// maps a box from image pixels to the screen (BoxFit.contain)
 class ImageFit {
   final double scale;
   final Offset offset;

@@ -5,7 +5,7 @@ import '../models/analysis.dart';
 import '../widgets/common.dart';
 import '../widgets/xray_viewer.dart';
 
-/// Doctor only: every model on the same X-ray and how much they agree (ModelComparisonService on the server).
+// doctor only
 class ComparisonScreen extends StatefulWidget {
   final Analysis analysis;
 

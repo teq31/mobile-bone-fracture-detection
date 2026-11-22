@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Shown to patients and students next to every result: the app helps, it does not diagnose.
+// for patients / students - the app doesn't diagnose
 class DisclaimerBanner extends StatelessWidget {
   const DisclaimerBanner({super.key});
 
@@ -31,7 +31,6 @@ class DisclaimerBanner extends StatelessWidget {
   }
 }
 
-/// A message in the middle of an empty list or after an error, with an optional retry button.
 class MessageView extends StatelessWidget {
   final IconData icon;
   final String message;

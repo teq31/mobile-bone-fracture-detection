@@ -37,7 +37,6 @@ class BoneFractureApp extends StatelessWidget {
   }
 }
 
-/// Restores the saved session, then shows the login or the home screen.
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
 

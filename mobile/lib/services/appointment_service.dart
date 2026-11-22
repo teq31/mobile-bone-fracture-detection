@@ -1,7 +1,7 @@
 import '../models/appointment.dart';
 import 'api_client.dart';
 
-/// /api/appointments (Federica's backend). The State pattern on the server decides what is allowed (409 otherwise).
+// the server decides what's allowed (State), we just show the 409 message
 class AppointmentService {
   final ApiClient _api;
 
@@ -25,6 +25,6 @@ class AppointmentService {
   Future<Appointment> _action(int id, String action) async =>
       Appointment.fromJson(await _api.post('/api/appointments/$id/$action') as Map<String, dynamic>);
 
-  /// The backend expects ISO-8601 local time without a zone, e.g. 2026-12-01T10:00:00
+  // backend wants local time without zone, e.g. 2026-12-01T10:00:00
   static String _localIso(DateTime value) => value.toIso8601String().split('.').first;
 }

@@ -1,7 +1,6 @@
 import '../models/app_notification.dart';
 import 'api_client.dart';
 
-/// /api/notifications: created on the server when an appointment changes state.
 class NotificationService {
   final ApiClient _api;
 

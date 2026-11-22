@@ -28,7 +28,6 @@ String roleLabel(Role role) {
   }
 }
 
-/// Body of POST /api/auth/register and GET /api/auth/me.
 class User {
   final int id;
   final String name;

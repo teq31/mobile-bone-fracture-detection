@@ -7,7 +7,6 @@ import '../services/analysis_service.dart';
 import '../widgets/common.dart';
 import 'result_screen.dart';
 
-/// Choose the X-ray (gallery, camera, PDF, DICOM) and the body part, then send it for analysis.
 class AnalyzeScreen extends StatefulWidget {
   final VoidCallback? onAnalyzed;
 

@@ -7,7 +7,6 @@ import '../widgets/xray_viewer.dart';
 import 'appointments_screen.dart';
 import 'comparison_screen.dart';
 
-/// The result of one analysis: the X-ray with the boxes (and the heatmap), a summary and the next steps.
 class ResultScreen extends StatefulWidget {
   final Analysis analysis;
 

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-/// A rectangle in the pixels of the analysed image.
+// in pixels of the analysed image, not screen pixels
 class BoundingBox {
   final double x;
   final double y;
@@ -31,7 +31,6 @@ class Detection {
       );
 }
 
-/// Response of POST /api/analyses (docs/api/api-contract.md).
 class Analysis {
   final String id;
   final String model;
@@ -39,7 +38,7 @@ class Analysis {
   final String? imageUrl;
   final DateTime createdAt;
 
-  /// The image the boxes refer to; filled by the app (downloaded, or the picked file in demo mode).
+  // filled in by the app, not part of the json
   final Uint8List? imageBytes;
 
   const Analysis({
@@ -76,7 +75,6 @@ class Analysis {
       detections.fold<double>(0, (best, d) => d.confidence > best ? d.confidence : best);
 }
 
-/// One item of GET /api/analyses/history.
 class HistoryItem {
   final String analysisId;
   final String model;
@@ -93,7 +91,6 @@ class HistoryItem {
       );
 }
 
-/// One finding of GET /api/analyses/{id}/comparison (doctor only).
 class ComparisonFinding {
   final String label;
   final double confidence;

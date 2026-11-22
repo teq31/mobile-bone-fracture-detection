@@ -8,7 +8,6 @@ import 'services/appointment_service.dart';
 import 'services/auth_service.dart';
 import 'services/notification_service.dart';
 
-/// The services of the app and the logged-in user, shared by every screen.
 class AppState extends ChangeNotifier {
   final ApiClient api;
   late final AuthService auth = AuthService(api);

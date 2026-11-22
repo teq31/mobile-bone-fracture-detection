@@ -4,8 +4,6 @@ import '../app_scope.dart';
 import '../models/appointment.dart';
 import '../widgets/common.dart';
 
-/// Appointments between patients and doctors. The patient asks for one, the doctor confirms it,
-/// either of them can cancel it; the rules are checked on the server (State pattern).
 class AppointmentsScreen extends StatefulWidget {
   final bool visible;
 
@@ -170,7 +168,7 @@ class _AppointmentCard extends StatelessWidget {
   }
 }
 
-/// Bottom sheet where a patient asks a doctor for an appointment. Returns true if one was created.
+// returns true if an appointment was created
 Future<bool> showRequestAppointmentSheet(BuildContext context) async {
   final created = await showModalBottomSheet<bool>(
     context: context,

@@ -1,4 +1,3 @@
-/// Body returned by /api/notifications (created by NotificationAspect on the backend).
 class AppNotification {
   final int id;
   final String type;

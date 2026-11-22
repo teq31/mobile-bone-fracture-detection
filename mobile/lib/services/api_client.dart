@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 
-/// An error returned by the backend (Spring ProblemDetail: title, status, detail) or a network error.
 class ApiException implements Exception {
   final int? status;
   final String message;
@@ -18,7 +17,7 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Small HTTP client for the Spring Boot backend: JSON bodies, the JWT in every request, readable errors.
+// adds the jwt to every request + turns ProblemDetail into a readable message
 class ApiClient {
   final String baseUrl;
   final http.Client _http;
@@ -43,7 +42,6 @@ class ApiClient {
         body: body == null ? null : jsonEncode(body),
       ));
 
-  /// multipart/form-data upload, e.g. the X-ray for POST /api/analyses
   Future<dynamic> upload(String path,
       {required String field,
       required Uint8List bytes,
@@ -58,7 +56,7 @@ class ApiClient {
     });
   }
 
-  /// Raw bytes, e.g. an image behind the JWT (Image.network cannot add the header on every platform).
+  // Image.network can't send the token on every platform, so we download the bytes
   Future<Uint8List> getBytes(String path) async {
     final response = await _call(() => _http.get(uri(path), headers: _headers));
     _throwIfError(response);
@@ -91,7 +89,6 @@ class ApiClient {
     throw ApiException(errorMessage(response.statusCode, response.body), status: response.statusCode);
   }
 
-  /// "detail" from a ProblemDetail body, otherwise a message from the status code.
   static String errorMessage(int status, String body) {
     try {
       final json = jsonDecode(body);

@@ -5,7 +5,7 @@ import 'package:bone_fracture_app/models/user.dart';
 import 'package:bone_fracture_app/services/api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The app reads exactly the JSON described in docs/api/backend-api.md and docs/api/api-contract.md.
+// json examples copied from backend-api.md / api-contract.md
 void main() {
   test('user from /api/auth/me', () {
     final user = User.fromJson({'id': 2, 'name': 'Dr. Smith', 'email': 'smith@clinic.com', 'role': 'DOCTOR', 'verified': false});
