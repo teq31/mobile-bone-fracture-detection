@@ -52,12 +52,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserEntity verifyDoctor(String doctorEmail) {
-        return null;
+        userService.verifyDoctor(doctorEmail);
+        return userRepository.findByEmail(doctorEmail).orElseThrow();
     }
 
     @Override
     public List<UserEntity> unverifiedDoctors() {
-        return List.of();
+        return userRepository.findByRoleAndVerifiedFalse(Role.DOCTOR);
     }
 }
