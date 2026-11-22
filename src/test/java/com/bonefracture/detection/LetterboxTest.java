@@ -80,4 +80,17 @@ class LetterboxTest {
         Rectangle r = box.toImageBox(new YoloBox(3, 0.9f, -20, 150, 700, 500));
         assertEquals(new Rectangle(0, 0, 1280, 640), r);
     }
+
+    @Test
+    void paletteImagesUseTheirColoursNotTheIndexes() {
+        BufferedImage palette = new BufferedImage(640, 640, BufferedImage.TYPE_BYTE_INDEXED);
+        Graphics2D g = palette.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, 640, 640);
+        g.dispose();
+        float[] tensor = Letterbox.of(palette, SIZE).tensor();
+        for (int channel = 0; channel < 3; channel++) {
+            assertEquals(1f, at(tensor, channel, 320, 320), 1e-6);
+        }
+    }
 }
