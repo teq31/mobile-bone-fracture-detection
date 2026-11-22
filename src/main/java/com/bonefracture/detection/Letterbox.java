@@ -66,17 +66,17 @@ final class Letterbox {
         return new Letterbox(tensor, scale, padLeft, padTop, width, height);
     }
 
-    // RGB values 0..255. Grey images with more than 8 bits (X-ray PNGs are 16 bit) are reduced to 8 bits.
+    // RGB values 0..255. Grey images with more than 8 bits (X-ray PNGs are 16 bit) keep the 8 high bits, like OpenCV.
     private static float[][] readRgb(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         float[][] rgb = new float[3][width * height];
         Raster raster = image.getRaster();
         if (raster.getNumBands() == 1) {
-            float divisor = 1 << Math.max(0, raster.getSampleModel().getSampleSize(0) - 8);
+            int shift = Math.max(0, raster.getSampleModel().getSampleSize(0) - 8);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    float value = Math.min(255, Math.round(raster.getSample(x, y, 0) / divisor));
+                    float value = raster.getSample(x, y, 0) >> shift;
                     int i = y * width + x;
                     rgb[0][i] = value;
                     rgb[1][i] = value;

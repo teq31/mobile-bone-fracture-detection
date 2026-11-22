@@ -72,6 +72,13 @@
             <version>${aspectj.version}</version>
         </dependency>
 
+        <!-- Runs the exported YOLOv8 fracture model (YoloOnnxModel) -->
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.20.0</version>
+        </dependency>
+
         <!-- Tests: JUnit 5, Mockito, Spring test support -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
