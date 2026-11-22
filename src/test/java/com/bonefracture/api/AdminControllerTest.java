@@ -96,4 +96,21 @@ class AdminControllerTest {
     void onlyDoctorsCanBeVerified() throws Exception {
         verify(adminToken, "ion@mail.com").andExpect(status().isBadRequest());
     }
+
+    @Test
+    void auditShowsWhoVerifiedTheDoctor() throws Exception {
+        verify(adminToken, "dan@clinic.com").andExpect(status().isOk());
+        mockMvc.perform(get("/api/admin/audit").header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].action").value("VERIFY_DOCTOR"))
+                .andExpect(jsonPath("$[0].actor").value("admin@mail.com"))
+                .andExpect(jsonPath("$[0].target").value("dan@clinic.com"))
+                .andExpect(jsonPath("$[0].success").value(true));
+    }
+
+    @Test
+    void auditIsOnlyForAdministrators() throws Exception {
+        mockMvc.perform(get("/api/admin/audit").header("Authorization", patientToken))
+                .andExpect(status().isForbidden());
+    }
 }
