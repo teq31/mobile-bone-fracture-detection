@@ -64,4 +64,8 @@ public class DatabaseUserService implements UserService {
                 .map(user -> passwordEncoder.matches(password, user.getPasswordHash()))
                 .orElse(false);
     }
+
+    @Override
+    public void verifyDoctor(String doctorEmail) {
+    }
 }

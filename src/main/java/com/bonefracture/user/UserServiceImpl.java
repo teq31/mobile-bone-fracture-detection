@@ -27,6 +27,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void verifyDoctor(String doctorEmail) {
+    }
+
+    @Override
     public boolean login(String email, String password) {
         User user = users.get(email);
         return user != null && user.login(password);

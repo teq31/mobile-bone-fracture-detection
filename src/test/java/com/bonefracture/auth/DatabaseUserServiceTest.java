@@ -6,6 +6,7 @@ import com.bonefracture.user.Doctor;
 import com.bonefracture.user.Patient;
 import com.bonefracture.user.Role;
 import com.bonefracture.user.Student;
+import com.bonefracture.user.UserNotFoundException;
 import com.bonefracture.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,5 +71,24 @@ class DatabaseUserServiceTest {
         assertTrue(userService.login("ion@mail.com", "pass1234"));
         assertFalse(userService.login("ion@mail.com", "wrong"));
         assertFalse(userService.login("nobody@mail.com", "pass1234"));
+    }
+
+    @Test
+    void verifyDoctorIsSaved() {
+        userService.register(Role.DOCTOR, "Dan", "dan@mail.com", "pass1234");
+        userService.verifyDoctor("dan@mail.com");
+        assertTrue(userRepository.findByEmail("dan@mail.com").orElseThrow().isVerified());
+    }
+
+    @Test
+    void onlyDoctorsCanBeVerified() {
+        userService.register(Role.PATIENT, "Ion", "ion@mail.com", "pass1234");
+        assertThrows(IllegalArgumentException.class, () -> userService.verifyDoctor("ion@mail.com"));
+        assertFalse(userRepository.findByEmail("ion@mail.com").orElseThrow().isVerified());
+    }
+
+    @Test
+    void verifyingAnUnknownEmailFails() {
+        assertThrows(UserNotFoundException.class, () -> userService.verifyDoctor("nobody@mail.com"));
     }
 }
