@@ -20,4 +20,23 @@ python ml/export_onnx.py
 
 The ONNX file (43 MB) is not in git. The backend loads it from `models/yolov8-fracture.onnx`
 (`YOLO_MODEL` changes the path); without it the placeholder `YoloModel` is used and the app still starts.
-With docker-compose the `models` folder is mounted into the backend container.
+
+## GitHub Release
+The file is published as an asset of the release `model-v1`:
+
+    https://github.com/teq31/mobile-bone-fracture-detection/releases/download/model-v1/yolov8-fracture.onnx
+
+    SHA-256  ba1b587fb3e47e79884915c11079610d7f95c230428a6f77c9038dad69180df7
+    size     44,759,050 bytes
+
+To download it for local work:
+
+    curl -L -o models/yolov8-fracture.onnx https://github.com/teq31/mobile-bone-fracture-detection/releases/download/model-v1/yolov8-fracture.onnx
+
+Running `export_onnx.py` again gives a working model, but with other library versions the file
+can differ byte by byte, so the release keeps the exact file the checksum belongs to.
+
+## Docker
+The `Dockerfile` downloads the release asset in its `model` stage, checks the SHA-256 (the build stops
+if it does not match) and puts it in the image at `/opt/model/yolov8-fracture.onnx` (`YOLO_MODEL`).
+`--build-arg MODEL_URL=` builds an image without the model.

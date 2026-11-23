@@ -26,6 +26,23 @@ The validation set has 3,740 fracture boxes, the same number as Table 3 of the p
 - Speed on 4 CPU cores: about 75 ms of inference per image in Python, about 160 ms for a whole
   analysis in Java (reading the 16-bit PNG, letterbox, inference and NMS, measured on 30 test X-rays).
 
+## Preprocessing before the model
+The analysis pipeline (`FractureAnalysisFacade`) resizes the X-ray to 640 px (`ImagePreprocessor.resize`)
+and could also stretch the contrast (`ImagePreprocessor.normalize`). Both were run with the team's Java
+code on the 4,094 validation X-rays and the results evaluated as above:
+
+| Before the model | mAP50 | mAP50-95 | fracture AP50 | fracture AP50-95 |
+|---|---|---|---|---|
+| nothing (only the model's letterbox) | 0.630 | 0.388 | 0.940 | 0.547 |
+| resize | **0.634** | **0.391** | 0.940 | 0.546 |
+| resize + contrast stretching | 0.623 | 0.386 | 0.938 | 0.543 |
+
+Contrast stretching makes every number a little worse: the model was trained on X-rays without it.
+It is therefore off (`app.analysis.contrast-stretching=false`); the resize step stays.
+
+The model runs on the resized copy, so the facade maps the boxes back to the uploaded X-ray before
+they are saved and returned (`FractureAnalysisFacade.onOriginal`); the app draws them on that image.
+
 ## Java: YoloOnnxModel
 `detection.YoloOnnxModel extends DetectionModel` (Strategy) runs the ONNX file with ONNX Runtime:
 
@@ -53,3 +70,5 @@ Two aspects of the team already apply to `YoloOnnxModel` through `DetectionModel
   Ultralytics on a GRAZPEDWRI-DX test image (confidence within 0.01, boxes within 3 px).
   The last one is skipped when the model file is missing.
 - `AnalysisBeansConfigTest`: ONNX model as main model when the file exists, placeholder otherwise
+
+Demo X-rays with the expected boxes: `demo/README.md`.
