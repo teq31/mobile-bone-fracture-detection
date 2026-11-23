@@ -43,6 +43,11 @@ It is therefore off (`app.analysis.contrast-stretching=false`); the resize step 
 The model runs on the resized copy, so the facade maps the boxes back to the uploaded X-ray before
 they are saved and returned (`FractureAnalysisFacade.onOriginal`); the app draws them on that image.
 
+Phone cameras often store a photo sideways and put the turn in the EXIF Orientation tag, which Java's
+ImageIO ignores. On such a photo the model saw a sideways X-ray and did not find the fracture. Uploaded
+JPEGs are therefore turned upright and saved without EXIF (`xray.ExifOrientation`) before the analysis,
+so the model, the stored image and the app all use the same upright picture.
+
 ## Java: YoloOnnxModel
 `detection.YoloOnnxModel extends DetectionModel` (Strategy) runs the ONNX file with ONNX Runtime:
 
