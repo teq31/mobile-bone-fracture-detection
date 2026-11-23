@@ -51,7 +51,8 @@ public class AnalysisStorageService {
         this.modelComparisonService = modelComparisonService;
         this.historyService = historyService;
         this.userRepository = userRepository;
-        this.uploadDir = Path.of(uploadDir);
+        // absolute: Tomcat would resolve a relative path against its own temp folder
+        this.uploadDir = Path.of(uploadDir).toAbsolutePath();
     }
 
     public AnalysisEntity analyze(Long userId, MultipartFile image, BodyPart bodyPart) {
