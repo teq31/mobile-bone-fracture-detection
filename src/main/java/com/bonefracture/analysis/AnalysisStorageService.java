@@ -12,6 +12,7 @@ import com.bonefracture.user.Role;
 import com.bonefracture.user.User;
 import com.bonefracture.user.UserMapper;
 import com.bonefracture.xray.BodyPart;
+import com.bonefracture.xray.ExifOrientation;
 import com.bonefracture.xray.FileFormat;
 import com.bonefracture.xray.adapter.DicomFile;
 import com.bonefracture.xray.adapter.DicomXRayAdapter;
@@ -62,8 +63,11 @@ public class AnalysisStorageService {
         if (bodyPart == null) {
             throw new IllegalArgumentException("bodyPart is required");
         }
-        File file = store(image);
         FileFormat format = formatOf(image.getOriginalFilename());
+        File file = store(image);
+        if (format == FileFormat.JPG) {
+            uprightPhoto(file);
+        }
         XRayImageSource source = adapterFor(file, format);
 
         User user = toDomainUser(userId);
@@ -126,6 +130,15 @@ public class AnalysisStorageService {
             return target.toFile();
         } catch (IOException e) {
             throw new UncheckedIOException("cannot store uploaded image", e);
+        }
+    }
+
+    // phone photos may be stored sideways with the turn in EXIF; the model and the app need them upright
+    private void uprightPhoto(File file) {
+        try {
+            ExifOrientation.makeUpright(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException("cannot turn the photo upright", e);
         }
     }
 
