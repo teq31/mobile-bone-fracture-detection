@@ -63,10 +63,9 @@ the main model when `models/yolov8-fracture.onnx` exists (path: `YOLO_MODEL`), o
 placeholder `YoloModel`, so the app starts without the file.
 
 Two aspects of the team already apply to `YoloOnnxModel` through `DetectionModel+.detect(..)`:
-- `CachingAspect` (this branch): the result for the same X-ray comes from the cache, so it is not
+- `CachingAspect` (Federica): the result for the same X-ray comes from the cache, so it is not
   analysed twice;
-- `PerformanceMonitoringAspect` (Teodora, branch `teodora/facade-adapter`): times every analysis step,
-  including the inference.
+- `PerformanceMonitoringAspect` (Teodora): times every analysis step, including the inference.
 
 ## Tests
 - `LetterboxTest`: scale and padding, grey padding, RGB 0..1, 16-bit grey, boxes mapped back and clipped
