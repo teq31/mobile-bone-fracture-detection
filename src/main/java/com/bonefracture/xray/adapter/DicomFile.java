@@ -2,8 +2,7 @@ package com.bonefracture.xray.adapter;
 
 import java.io.File;
 
-// Adapter pattern - Adaptee
-// Stands for an external DICOM library (e.g. dcm4che): 16-bit pixel data plus medical metadata.
+// Adaptee - placeholder for dcm4che
 public class DicomFile {
 
     private File file;
@@ -21,6 +20,7 @@ public class DicomFile {
         return null;
     }
 
+    public File getFile() { return file; }
     public int getRows() { return rows; }
     public int getColumns() { return columns; }
     public String getBodyPartExamined() { return bodyPartExamined; }

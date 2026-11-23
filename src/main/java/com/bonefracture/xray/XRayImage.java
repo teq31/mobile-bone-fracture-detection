@@ -2,6 +2,7 @@ package com.bonefracture.xray;
 
 import com.bonefracture.detection.AnalysisResult;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,11 @@ public class XRayImage {
     }
 
     public boolean validate() {
-        return false;
+        if (path == null || path.isBlank() || format == null || bodyPart == null) {
+            return false;
+        }
+        File file = new File(path);
+        return file.isFile() && file.length() > 0;
     }
 
     public void addResult(AnalysisResult r) {
@@ -36,6 +41,7 @@ public class XRayImage {
     public String getPath() { return path; }
     public FileFormat getFormat() { return format; }
     public BodyPart getBodyPart() { return bodyPart; }
+    public boolean isTakenWithCamera() { return takenWithCamera; }
     public LocalDateTime getUploadDate() {
         return uploadDate;
     }

@@ -2,6 +2,7 @@ package com.bonefracture.analysis;
 
 import com.bonefracture.cache.Cached;
 import com.bonefracture.detection.AnalysisResult;
+import com.bonefracture.detection.Detection;
 import com.bonefracture.detection.DetectionModel;
 import com.bonefracture.detection.FractureDetector;
 import com.bonefracture.detection.HeatmapGenerator;
@@ -17,11 +18,8 @@ import com.bonefracture.xray.adapter.XRayImageSource;
 import java.util.ArrayList;
 import java.util.List;
 
-// Facade pattern - Facade
-// One simple entry point for the app screens. It hides the steps of an analysis:
-// adapting the input (Adapter), validation, preprocessing, choosing the model,
-// detection (Strategy, through FractureDetector), heatmap and saving to history.
-public class FractureAnalysisFacade {
+// Facade - single entry point for an analysis (also the XRayAnalysisService impl)
+public class FractureAnalysisFacade implements XRayAnalysisService {
 
     private ImagePreprocessor preprocessor;
     private ModelRegistry modelRegistry;
@@ -41,21 +39,37 @@ public class FractureAnalysisFacade {
         this.historyRepository = historyRepository;
     }
 
-    // Student and Patient: one analysis with the main model
+    @Override
     public AnalysisResult analyzeXRay(User user, XRayImageSource source, BodyPart bodyPart) {
-        // TODO source.toXRayImage -> validate -> preprocess -> detect with the main model
-        //  -> heatmap for each detection -> save to history
-        return null;
+        XRayImage image = convertAndValidate(source, bodyPart);
+        DetectionModel mainModel = modelRegistry.getMainModel(); // throws IllegalStateException if there is none
+
+        AnalysisResult result = runModel(mainModel, preprocess(image));
+        keepOnOriginal(image, result);
+
+        historyRepository.save(user, image);
+        return result;
     }
 
-    // Doctor: the same X-ray analyzed by every available model
+    @Override
     public List<AnalysisResult> compareModels(Doctor doctor, XRayImageSource source, BodyPart bodyPart) {
-        // TODO validate -> preprocess -> heatmap -> save to history
-        return compareModels(source.toXRayImage(bodyPart));
+        if (!doctor.isVerified()) {
+            throw new IllegalStateException("Only doctors verified by an administrator can compare models");
+        }
+        XRayImage image = convertAndValidate(source, bodyPart);
+        XRayImage prepared = preprocess(image);
+
+        List<AnalysisResult> results = compareModels(prepared);
+        for (AnalysisResult result : results) {
+            addHeatmaps(result, prepared);
+            keepOnOriginal(image, result);
+        }
+
+        historyRepository.save(doctor, image);
+        return results;
     }
 
-    // The comparison is cached by the content hash of the X-ray (CachingAspect, @Cached),
-    // so the same X-ray is compared only once in 10 minutes.
+    // cached by image hash for 10 min (Federica's @Cached)
     @Cached(name = "model-comparison", ttlSeconds = 600, maxEntries = 100)
     public List<AnalysisResult> compareModels(XRayImage image) {
         List<AnalysisResult> results = new ArrayList<>();
@@ -65,8 +79,42 @@ public class FractureAnalysisFacade {
         return List.copyOf(results);
     }
 
+    @Override
     public List<XRayImage> getHistory(User user) {
-        // TODO
-        return new ArrayList<>();
+        return historyRepository.findByUser(user);
+    }
+
+    // shared steps (refactor, tdd it. 2)
+
+    private XRayImage convertAndValidate(XRayImageSource source, BodyPart bodyPart) {
+        XRayImage image = source.toXRayImage(bodyPart);
+        if (!image.validate()) {
+            throw new IllegalArgumentException("The X-ray image is not valid: " + image.getPath());
+        }
+        return image;
+    }
+
+    private XRayImage preprocess(XRayImage image) {
+        return preprocessor.normalize(preprocessor.resize(image));
+    }
+
+    // detector saves the result on the resized copy, history needs it on the original
+    private void keepOnOriginal(XRayImage original, AnalysisResult result) {
+        if (!original.getResults().contains(result)) {
+            original.addResult(result);
+        }
+    }
+
+    private AnalysisResult runModel(DetectionModel model, XRayImage prepared) {
+        detector.setModel(model);
+        AnalysisResult result = detector.analyze(prepared);
+        addHeatmaps(result, prepared);
+        return result;
+    }
+
+    private void addHeatmaps(AnalysisResult result, XRayImage prepared) {
+        for (Detection detection : result.getDetections()) {
+            detection.setHeatmap(heatmapGenerator.generate(prepared, detection));
+        }
     }
 }
