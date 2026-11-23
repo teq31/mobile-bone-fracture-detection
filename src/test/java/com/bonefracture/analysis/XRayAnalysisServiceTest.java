@@ -22,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -152,6 +154,55 @@ class XRayAnalysisServiceTest {
 
         assertTrue(image.getResults().contains(result), "the X-ray in the history shows the result");
         assertTrue(prepared.getResults().contains(result));
+    }
+
+    @Test
+    void boxesAreOnTheOriginalXRayNotOnTheResizedCopy() throws IOException {
+        XRayImage original = pngImage(1280, 640);
+        XRayImage prepared = pngImage(640, 320);
+        XRayAnalysisService realisticService = new FractureAnalysisFacade(new CopyingPreprocessor(prepared), registry,
+                new FractureDetector(mainModel), heatmapGenerator, new HistoryRepository());
+
+        AnalysisResult result = realisticService.analyzeXRay(student, new FakeSource(original), BodyPart.WRIST);
+
+        // the model saw the 640x320 copy and found (10, 10, 50, 50) there
+        assertEquals(new Rectangle(20, 20, 100, 100), result.getDetections().get(0).getBoundingBox());
+        assertTrue(original.getResults().contains(result));
+    }
+
+    @Test
+    void sameXRayTwiceGivesTheSameBoxes() throws IOException {
+        XRayImage original = pngImage(1280, 640);
+        XRayImage prepared = pngImage(640, 320);
+        XRayAnalysisService realisticService = new FractureAnalysisFacade(new CopyingPreprocessor(prepared), registry,
+                new FractureDetector(mainModel), heatmapGenerator, new HistoryRepository());
+
+        realisticService.analyzeXRay(student, new FakeSource(original), BodyPart.WRIST);
+        AnalysisResult second = realisticService.analyzeXRay(student, new FakeSource(original), BodyPart.WRIST);
+
+        assertEquals(new Rectangle(20, 20, 100, 100), second.getDetections().get(0).getBoundingBox());
+    }
+
+    @Test
+    void comparisonBoxesAreOnTheOriginalXRay() throws IOException {
+        new Administrator("Admin", "admin@app.com").verifyDoctor(doctor);
+        XRayImage original = pngImage(1280, 640);
+        XRayImage prepared = pngImage(640, 320);
+        XRayAnalysisService realisticService = new FractureAnalysisFacade(new CopyingPreprocessor(prepared), registry,
+                new FractureDetector(mainModel), heatmapGenerator, new HistoryRepository());
+
+        List<AnalysisResult> results = realisticService.compareModels(doctor, new FakeSource(original), BodyPart.WRIST);
+
+        for (AnalysisResult result : results) {
+            assertEquals(new Rectangle(20, 20, 100, 100), result.getDetections().get(0).getBoundingBox());
+        }
+    }
+
+    private static XRayImage pngImage(int width, int height) throws IOException {
+        File file = Files.createTempFile("xray", ".png").toFile();
+        file.deleteOnExit();
+        ImageIO.write(new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY), "png", file);
+        return new XRayImage(file.getPath(), FileFormat.PNG, BodyPart.WRIST, false);
     }
 
     @Test
