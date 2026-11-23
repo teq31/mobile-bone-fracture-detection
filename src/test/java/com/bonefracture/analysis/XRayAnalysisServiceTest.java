@@ -1,5 +1,6 @@
 package com.bonefracture.analysis;
 
+import com.bonefracture.cache.CacheRegistry;
 import com.bonefracture.detection.AnalysisResult;
 import com.bonefracture.detection.Detection;
 import com.bonefracture.detection.DetectionModel;
@@ -51,6 +52,7 @@ class XRayAnalysisServiceTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        CacheRegistry.clearAll(); // the cache keeps results between tests
         File file = Files.createTempFile("wrist", ".png").toFile();
         Files.write(file.toPath(), new byte[]{1, 2, 3});
         file.deleteOnExit();

@@ -1,5 +1,6 @@
 package com.bonefracture.analysis;
 
+import com.bonefracture.cache.Cached;
 import com.bonefracture.detection.AnalysisResult;
 import com.bonefracture.detection.Detection;
 import com.bonefracture.detection.DetectionModel;
@@ -58,15 +59,24 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         XRayImage image = convertAndValidate(source, bodyPart);
         XRayImage prepared = preprocess(image);
 
-        List<AnalysisResult> results = new ArrayList<>();
-        for (DetectionModel model : modelRegistry.getAllModels()) {
-            AnalysisResult result = runModel(model, prepared);
+        List<AnalysisResult> results = compareModels(prepared);
+        for (AnalysisResult result : results) {
+            addHeatmaps(result, prepared);
             keepOnOriginal(image, result);
-            results.add(result);
         }
 
         historyRepository.save(doctor, image);
         return results;
+    }
+
+    // cached by image hash for 10 min (Federica's @Cached)
+    @Cached(name = "model-comparison", ttlSeconds = 600, maxEntries = 100)
+    public List<AnalysisResult> compareModels(XRayImage image) {
+        List<AnalysisResult> results = new ArrayList<>();
+        for (DetectionModel model : modelRegistry.getAllModels()) {
+            results.add(model.detect(image));
+        }
+        return List.copyOf(results);
     }
 
     @Override
@@ -98,9 +108,13 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
     private AnalysisResult runModel(DetectionModel model, XRayImage prepared) {
         detector.setModel(model);
         AnalysisResult result = detector.analyze(prepared);
+        addHeatmaps(result, prepared);
+        return result;
+    }
+
+    private void addHeatmaps(AnalysisResult result, XRayImage prepared) {
         for (Detection detection : result.getDetections()) {
             detection.setHeatmap(heatmapGenerator.generate(prepared, detection));
         }
-        return result;
     }
 }

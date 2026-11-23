@@ -27,6 +27,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void verifyDoctor(String doctorEmail) {
+        User user = users.get(doctorEmail);
+        if (user == null) {
+            throw new UserNotFoundException(doctorEmail);
+        }
+        if (!(user instanceof Doctor doctor)) {
+            throw new IllegalArgumentException(doctorEmail + " is not a doctor");
+        }
+        doctor.setVerified(true);
+    }
+
+    @Override
     public boolean login(String email, String password) {
         User user = users.get(email);
         return user != null && user.login(password);

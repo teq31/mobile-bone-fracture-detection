@@ -16,4 +16,13 @@ public interface AppointmentState {
     void sendReminder(Appointment appointment);
 
     AppointmentStatus getStatus();
+
+    /** The state object for a status saved in the database. */
+    static AppointmentState forStatus(AppointmentStatus status) {
+        return switch (status) {
+            case REQUESTED -> RequestedState.INSTANCE;
+            case CONFIRMED -> ConfirmedState.INSTANCE;
+            case CANCELLED -> CancelledState.INSTANCE;
+        };
+    }
 }

@@ -226,3 +226,7 @@ __marimo__/
 /bin/
 .idea/
 *.iml
+
+# Detection model files (created by ml/export_onnx.py)
+/models/*.pt
+/models/*.onnx

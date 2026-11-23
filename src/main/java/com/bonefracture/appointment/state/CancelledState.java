@@ -9,23 +9,25 @@ import com.bonefracture.appointment.AppointmentStatus;
  */
 public class CancelledState implements AppointmentState {
 
+    public static final CancelledState INSTANCE = new CancelledState();
+
     @Override
     public void confirm(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new IllegalStateException("Cannot confirm a cancelled appointment");
     }
 
     @Override
     public void cancel(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new IllegalStateException("Appointment is already cancelled");
     }
 
     @Override
     public void sendReminder(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new IllegalStateException("Cannot send a reminder for a cancelled appointment");
     }
 
     @Override
     public AppointmentStatus getStatus() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return AppointmentStatus.CANCELLED;
     }
 }

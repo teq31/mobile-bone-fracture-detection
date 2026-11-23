@@ -2,6 +2,7 @@ package com.bonefracture.notification.observer;
 
 import com.bonefracture.notification.Notification;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,20 +12,22 @@ import java.util.List;
  */
 public abstract class AbstractNotificationSubject implements NotificationSubject {
 
-    protected List<NotificationObserver> observers;
+    protected List<NotificationObserver> observers = new ArrayList<>();
 
     @Override
     public void attach(NotificationObserver observer) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        observers.add(observer);
     }
 
     @Override
     public void detach(NotificationObserver observer) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        observers.remove(observer);
     }
 
     @Override
     public void notifyObservers(Notification notification) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        for (NotificationObserver observer : observers) {
+            observer.update(notification);
+        }
     }
 }

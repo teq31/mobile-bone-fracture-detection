@@ -34,4 +34,22 @@ class UserServiceTest {
         assertFalse(service.login("ion@mail.com", "wrong"));
         assertFalse(service.login("nobody@mail.com", "pass123"));
     }
+
+    @Test
+    void verifyDoctorMarksTheDoctorAsVerified() {
+        Doctor doctor = (Doctor) service.register(Role.DOCTOR, "Dan", "dan@mail.com", "pass123");
+        service.verifyDoctor("dan@mail.com");
+        assertTrue(doctor.isVerified());
+    }
+
+    @Test
+    void onlyDoctorsCanBeVerified() {
+        service.register(Role.PATIENT, "Ion", "ion@mail.com", "pass123");
+        assertThrows(IllegalArgumentException.class, () -> service.verifyDoctor("ion@mail.com"));
+    }
+
+    @Test
+    void verifyingAnUnknownEmailFails() {
+        assertThrows(UserNotFoundException.class, () -> service.verifyDoctor("nobody@mail.com"));
+    }
 }
