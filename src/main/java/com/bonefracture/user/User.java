@@ -44,4 +44,20 @@ public abstract class User {
 
     public String getName() { return name; }
     public String getEmail() { return email; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User other)) {
+            return false;
+        }
+        return email != null && email.equals(other.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return email == null ? 0 : email.hashCode();
+    }
 }
