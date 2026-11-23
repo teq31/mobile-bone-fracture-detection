@@ -31,7 +31,7 @@ The file is published as an asset of the release `model-v1`:
 
 To download it for local work:
 
-    curl -L -o models/yolov8-fracture.onnx https://github.com/teq31/mobile-bone-fracture-detection/releases/download/model-v1/yolov8-fracture.onnx
+    curl -L --create-dirs -o models/yolov8-fracture.onnx https://github.com/teq31/mobile-bone-fracture-detection/releases/download/model-v1/yolov8-fracture.onnx
 
 Running `export_onnx.py` again gives a working model, but with other library versions the file
 can differ byte by byte, so the release keeps the exact file the checksum belongs to.

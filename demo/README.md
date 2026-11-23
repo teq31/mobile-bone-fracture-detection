@@ -18,6 +18,32 @@ The response also has a `text` box (the R / L marker on the film) and, for the s
 `pronatorsign` (a soft-tissue sign that often goes with this fracture). The app can show only
 `fracture` boxes if that is clearer for the demo.
 
+## Running the demo locally
+In Git Bash (Windows) or a terminal (Mac, Linux), from the repository folder:
+
+```
+# 1. the model, from the GitHub Release (models/ is not in git)
+curl -L --create-dirs -o models/yolov8-fracture.onnx https://github.com/teq31/mobile-bone-fracture-detection/releases/download/model-v1/yolov8-fracture.onnx
+
+# 2. the backend, with an administrator account (Windows: mvnw.cmd, Mac/Linux: sh mvnw)
+ADMIN_EMAIL=admin@clinic.com ADMIN_PASSWORD=admin12345 sh mvnw spring-boot:run
+```
+
+In a second terminal, a patient account and one analysis:
+
+```
+curl -X POST http://localhost:8080/api/auth/register -H "Content-Type: application/json" \
+     -d '{"name": "Ion Pop", "email": "ion@mail.com", "password": "patient123", "role": "PATIENT"}'
+curl -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" \
+     -d '{"email": "ion@mail.com", "password": "patient123"}'
+TOKEN=<the "token" from the login answer>
+curl -X POST http://localhost:8080/api/analyses -H "Authorization: Bearer $TOKEN" \
+     -F "image=@demo/xrays/1-right-front.png" -F "bodyPart=WRIST"
+```
+
+The answer has `"label":"fracture","confidence":0.87...` with the box `165, 642, 140, 147`, and the
+analysis shows up in `GET /api/analyses/history`.
+
 For the photo: show the X-ray full screen with high brightness, hold the phone parallel to the
 screen and avoid reflections. The images here are 8-bit PNGs converted from the 16-bit originals.
 
