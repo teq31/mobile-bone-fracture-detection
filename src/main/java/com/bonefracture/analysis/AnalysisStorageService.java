@@ -4,7 +4,6 @@ import com.bonefracture.detection.AnalysisResult;
 import com.bonefracture.detection.Detection;
 import com.bonefracture.detection.composite.DetectionGroup;
 import com.bonefracture.persistence.AnalysisEntity;
-import com.bonefracture.persistence.AnalysisRepository;
 import com.bonefracture.persistence.DetectionEntity;
 import com.bonefracture.persistence.UserEntity;
 import com.bonefracture.persistence.UserRepository;
@@ -39,18 +38,18 @@ public class AnalysisStorageService {
 
     private final XRayAnalysisService analysisService;
     private final ModelComparisonService modelComparisonService;
-    private final AnalysisRepository analysisRepository;
+    private final AnalysisHistoryService historyService;
     private final UserRepository userRepository;
     private final Path uploadDir;
 
     public AnalysisStorageService(XRayAnalysisService analysisService,
                                   ModelComparisonService modelComparisonService,
-                                  AnalysisRepository analysisRepository,
+                                  AnalysisHistoryService historyService,
                                   UserRepository userRepository,
                                   @Value("${app.analysis.upload-dir:uploads}") String uploadDir) {
         this.analysisService = analysisService;
         this.modelComparisonService = modelComparisonService;
-        this.analysisRepository = analysisRepository;
+        this.historyService = historyService;
         this.userRepository = userRepository;
         this.uploadDir = Path.of(uploadDir);
     }
@@ -78,15 +77,15 @@ public class AnalysisStorageService {
         for (Detection detection : result.getDetections()) {
             entity.addDetection(toDetectionEntity(detection));
         }
-        return analysisRepository.save(entity);
+        return historyService.save(entity);
     }
 
     public List<AnalysisEntity> history(Long userId) {
-        return analysisRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return historyService.findByUser(userId);
     }
 
     public AnalysisEntity get(Long userId, Long analysisId) {
-        AnalysisEntity entity = analysisRepository.findById(analysisId)
+        AnalysisEntity entity = historyService.findById(analysisId)
                 .orElseThrow(() -> new NoSuchElementException("analysis not found: " + analysisId));
         if (!entity.getUserId().equals(userId)) {
             throw new NoSuchElementException("analysis not found: " + analysisId);
