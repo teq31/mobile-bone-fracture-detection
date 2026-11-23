@@ -15,7 +15,15 @@ import com.bonefracture.xray.ImagePreprocessor;
 import com.bonefracture.xray.XRayImage;
 import com.bonefracture.xray.adapter.XRayImageSource;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 // Facade - single entry point for an analysis (also the XRayAnalysisService impl)
@@ -44,7 +52,8 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         XRayImage image = convertAndValidate(source, bodyPart);
         DetectionModel mainModel = modelRegistry.getMainModel(); // throws IllegalStateException if there is none
 
-        AnalysisResult result = runModel(mainModel, preprocess(image));
+        XRayImage prepared = preprocess(image);
+        AnalysisResult result = onOriginal(runModel(mainModel, prepared), prepared, image);
         keepOnOriginal(image, result);
 
         historyRepository.save(user, image);
@@ -59,10 +68,12 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         XRayImage image = convertAndValidate(source, bodyPart);
         XRayImage prepared = preprocess(image);
 
-        List<AnalysisResult> results = compareModels(prepared);
-        for (AnalysisResult result : results) {
+        List<AnalysisResult> results = new ArrayList<>();
+        for (AnalysisResult result : compareModels(prepared)) {
             addHeatmaps(result, prepared);
-            keepOnOriginal(image, result);
+            AnalysisResult onOriginal = onOriginal(result, prepared, image);
+            keepOnOriginal(image, onOriginal);
+            results.add(onOriginal);
         }
 
         historyRepository.save(doctor, image);
@@ -102,6 +113,51 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
     private void keepOnOriginal(XRayImage original, AnalysisResult result) {
         if (!original.getResults().contains(result)) {
             original.addResult(result);
+        }
+    }
+
+    // The model saw the resized copy, the app draws the boxes on the uploaded X-ray.
+    // A new result is returned: the one from the model may come from the cache and must stay as it is.
+    private AnalysisResult onOriginal(AnalysisResult result, XRayImage prepared, XRayImage original) {
+        Dimension from = sizeOf(prepared);
+        Dimension to = sizeOf(original);
+        if (from == null || to == null || from.equals(to)) {
+            return result;
+        }
+        double scaleX = (double) to.width / from.width;
+        double scaleY = (double) to.height / from.height;
+        AnalysisResult mapped = new AnalysisResult(result.getModel());
+        for (Detection detection : result.getDetections()) {
+            Rectangle box = detection.getBoundingBox();
+            if (box != null) {
+                int x1 = (int) Math.round(box.x * scaleX);
+                int y1 = (int) Math.round(box.y * scaleY);
+                int x2 = (int) Math.round((box.x + box.width) * scaleX);
+                int y2 = (int) Math.round((box.y + box.height) * scaleY);
+                box = new Rectangle(x1, y1, x2 - x1, y2 - y1);
+            }
+            mapped.addDetection(new Detection(detection.getLabel(), detection.getConfidence(), box,
+                    detection.getHeatmap()));
+        }
+        return mapped;
+    }
+
+    // width and height without decoding the whole image; null if it cannot be read
+    private static Dimension sizeOf(XRayImage image) {
+        try (ImageInputStream in = ImageIO.createImageInputStream(new File(image.getPath()))) {
+            Iterator<ImageReader> readers = in == null ? null : ImageIO.getImageReaders(in);
+            if (readers == null || !readers.hasNext()) {
+                return null;
+            }
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(in);
+                return new Dimension(reader.getWidth(0), reader.getHeight(0));
+            } finally {
+                reader.dispose();
+            }
+        } catch (IOException e) {
+            return null;
         }
     }
 
