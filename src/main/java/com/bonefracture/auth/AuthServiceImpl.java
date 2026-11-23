@@ -8,6 +8,8 @@ import com.bonefracture.user.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * SOA: implementation of AuthService. Accounts are created and checked by UserService
  * (Ianis's interface, implemented by DatabaseUserService with his factories); this service
@@ -47,5 +49,17 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserEntity getUser(Long id) {
         return userRepository.findById(id).orElseThrow(InvalidCredentialsException::new);
+    }
+
+    @Override
+    @Transactional
+    public UserEntity verifyDoctor(String doctorEmail) {
+        userService.verifyDoctor(doctorEmail);
+        return userRepository.findByEmail(doctorEmail).orElseThrow();
+    }
+
+    @Override
+    public List<UserEntity> unverifiedDoctors() {
+        return userRepository.findByRoleAndVerifiedFalse(Role.DOCTOR);
     }
 }

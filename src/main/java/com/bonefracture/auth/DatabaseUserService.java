@@ -10,6 +10,7 @@ import com.bonefracture.user.Role;
 import com.bonefracture.user.StudentFactory;
 import com.bonefracture.user.User;
 import com.bonefracture.user.UserFactory;
+import com.bonefracture.user.UserNotFoundException;
 import com.bonefracture.user.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -63,5 +64,16 @@ public class DatabaseUserService implements UserService {
         return userRepository.findByEmail(email)
                 .map(user -> passwordEncoder.matches(password, user.getPasswordHash()))
                 .orElse(false);
+    }
+
+    @Override
+    public void verifyDoctor(String doctorEmail) {
+        UserEntity user = userRepository.findByEmail(doctorEmail)
+                .orElseThrow(() -> new UserNotFoundException(doctorEmail));
+        if (user.getRole() != Role.DOCTOR) {
+            throw new IllegalArgumentException(doctorEmail + " is not a doctor");
+        }
+        user.setVerified(true);
+        userRepository.save(user);
     }
 }

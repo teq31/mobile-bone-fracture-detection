@@ -3,6 +3,8 @@ package com.bonefracture.auth;
 import com.bonefracture.persistence.UserEntity;
 import com.bonefracture.user.Role;
 
+import java.util.List;
+
 /**
  * SOA: service for creating accounts and logging in.
  */
@@ -15,4 +17,9 @@ public interface AuthService {
     String login(String email, String password);
 
     UserEntity getUser(Long id);
+
+    /** Administrator only: marks a doctor account as verified. */
+    UserEntity verifyDoctor(String doctorEmail);
+
+    List<UserEntity> unverifiedDoctors();
 }
