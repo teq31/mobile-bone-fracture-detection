@@ -1,6 +1,9 @@
 package com.bonefracture.appointment;
 
 import com.bonefracture.appointment.state.AppointmentState;
+import com.bonefracture.appointment.state.RequestedState;
+import com.bonefracture.notification.Notification;
+import com.bonefracture.notification.NotificationType;
 import com.bonefracture.notification.observer.AbstractNotificationSubject;
 import com.bonefracture.user.Doctor;
 import com.bonefracture.user.Patient;
@@ -23,31 +26,46 @@ public class Appointment extends AbstractNotificationSubject {
     private AppointmentState state;
 
     public Appointment(Doctor doctor, Patient patient, LocalDateTime dateTime) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        this.doctor = doctor;
+        this.patient = patient;
+        this.dateTime = dateTime;
+        this.state = RequestedState.INSTANCE;
+    }
+
+    /** Rebuilds an appointment loaded from the database, in the state it was saved in. */
+    public static Appointment restore(Doctor doctor, Patient patient, LocalDateTime dateTime, AppointmentStatus status) {
+        Appointment appointment = new Appointment(doctor, patient, dateTime);
+        appointment.setState(AppointmentState.forStatus(status));
+        return appointment;
     }
 
     /** Delegates to the current state. */
     public void confirm() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        state.confirm(this);
     }
 
     /** Delegates to the current state. */
     public void cancel() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        state.cancel(this);
     }
 
     /** Delegates to the current state. */
     public void sendReminder() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        state.sendReminder(this);
     }
 
     /** Called by the concrete states to move the appointment to a new state. */
     public void setState(AppointmentState state) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        this.state = state;
+    }
+
+    /** Called by the concrete states to tell the observers what changed. */
+    public void notifyPatient(NotificationType type, String message) {
+        notifyObservers(new Notification(type, patient, message));
     }
 
     public AppointmentStatus getStatus() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return state.getStatus();
     }
 
     public Long getId() {
@@ -55,14 +73,14 @@ public class Appointment extends AbstractNotificationSubject {
     }
 
     public LocalDateTime getDateTime() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return dateTime;
     }
 
     public Doctor getDoctor() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return doctor;
     }
 
     public Patient getPatient() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return patient;
     }
 }

@@ -7,26 +7,30 @@ import com.bonefracture.appointment.AppointmentStatus;
  * STATE pattern: Concrete State.
  * Initial state. Allowed: confirm (-> Confirmed), cancel (-> Cancelled).
  * Not allowed: sendReminder.
+ * Notifications are sent by NotificationAspect (AOP), not here.
  */
 public class RequestedState implements AppointmentState {
 
+    /** States have no fields, so one shared instance is enough (GoF State: sharing state objects). */
+    public static final RequestedState INSTANCE = new RequestedState();
+
     @Override
     public void confirm(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        appointment.setState(ConfirmedState.INSTANCE);
     }
 
     @Override
     public void cancel(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        appointment.setState(CancelledState.INSTANCE);
     }
 
     @Override
     public void sendReminder(Appointment appointment) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new IllegalStateException("Cannot send a reminder for an appointment that is not confirmed");
     }
 
     @Override
     public AppointmentStatus getStatus() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return AppointmentStatus.REQUESTED;
     }
 }
