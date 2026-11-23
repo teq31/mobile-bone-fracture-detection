@@ -1,8 +1,11 @@
 package com.bonefracture.api;
 
 import com.bonefracture.analysis.AnalysisStorageService;
+import com.bonefracture.analysis.NotAllowedToCompareException;
 import com.bonefracture.api.dto.AnalysisResponse;
+import com.bonefracture.api.dto.ComparisonResponse;
 import com.bonefracture.api.dto.HistoryResponse;
+import com.bonefracture.detection.composite.DetectionGroup;
 import com.bonefracture.persistence.AnalysisEntity;
 import com.bonefracture.xray.BodyPart;
 import com.bonefracture.xray.FileFormat;
@@ -61,6 +64,18 @@ public class AnalysisController {
         return ResponseEntity.ok()
                 .contentType(mediaType(entity.getFormat()))
                 .body(new ByteArrayResource(bytes));
+    }
+
+    @GetMapping("/{id}/comparison")
+    public ComparisonResponse comparison(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        try {
+            DetectionGroup view = storageService.compare(userId(jwt), id);
+            return ComparisonResponse.from(view, storageService.modelComparison());
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (NotAllowedToCompareException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+        }
     }
 
     private AnalysisEntity find(Jwt jwt, Long id) {

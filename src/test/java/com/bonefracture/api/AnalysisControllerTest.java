@@ -117,4 +117,32 @@ class AnalysisControllerTest {
         mockMvc.perform(get("/api/analyses/history"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void comparison_forbiddenForNonDoctor() throws Exception {
+        long id = createAnalysis();
+        mockMvc.perform(get("/api/analyses/" + id + "/comparison").header("Authorization", bearer(patient)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void comparison_okForVerifiedDoctor() throws Exception {
+        UserEntity doctor = new UserEntity("Dr. Smith", "smith@clinic.com", "hash", Role.DOCTOR);
+        doctor.setVerified(true);
+        doctor = userRepository.save(doctor);
+
+        MvcResult created = mockMvc.perform(multipart("/api/analyses")
+                        .file(pngUpload())
+                        .param("bodyPart", "WRIST")
+                        .header("Authorization", bearer(doctor)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long id = com.jayway.jsonpath.JsonPath.parse(created.getResponse().getContentAsString())
+                .read("$.analysisId", Long.class);
+
+        mockMvc.perform(get("/api/analyses/" + id + "/comparison").header("Authorization", bearer(doctor)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalModels").exists())
+                .andExpect(jsonPath("$.findings").exists());
+    }
 }

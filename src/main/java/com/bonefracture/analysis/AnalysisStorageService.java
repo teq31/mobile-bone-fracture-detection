@@ -2,11 +2,14 @@ package com.bonefracture.analysis;
 
 import com.bonefracture.detection.AnalysisResult;
 import com.bonefracture.detection.Detection;
+import com.bonefracture.detection.composite.DetectionGroup;
 import com.bonefracture.persistence.AnalysisEntity;
 import com.bonefracture.persistence.AnalysisRepository;
 import com.bonefracture.persistence.DetectionEntity;
 import com.bonefracture.persistence.UserEntity;
 import com.bonefracture.persistence.UserRepository;
+import com.bonefracture.service.ModelComparisonService;
+import com.bonefracture.user.Role;
 import com.bonefracture.user.User;
 import com.bonefracture.user.UserMapper;
 import com.bonefracture.xray.BodyPart;
@@ -35,15 +38,18 @@ import java.util.UUID;
 public class AnalysisStorageService {
 
     private final XRayAnalysisService analysisService;
+    private final ModelComparisonService modelComparisonService;
     private final AnalysisRepository analysisRepository;
     private final UserRepository userRepository;
     private final Path uploadDir;
 
     public AnalysisStorageService(XRayAnalysisService analysisService,
+                                  ModelComparisonService modelComparisonService,
                                   AnalysisRepository analysisRepository,
                                   UserRepository userRepository,
                                   @Value("${app.analysis.upload-dir:uploads}") String uploadDir) {
         this.analysisService = analysisService;
+        this.modelComparisonService = modelComparisonService;
         this.analysisRepository = analysisRepository;
         this.userRepository = userRepository;
         this.uploadDir = Path.of(uploadDir);
@@ -86,6 +92,21 @@ public class AnalysisStorageService {
             throw new NoSuchElementException("analysis not found: " + analysisId);
         }
         return entity;
+    }
+
+    public DetectionGroup compare(Long userId, Long analysisId) {
+        AnalysisEntity entity = get(userId, analysisId);
+        UserEntity account = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("user not found: " + userId));
+        if (account.getRole() != Role.DOCTOR || !account.isVerified()) {
+            throw new NotAllowedToCompareException("only a verified doctor can compare models");
+        }
+        XRayImageSource source = adapterFor(new File(entity.getImagePath()), entity.getFormat());
+        return modelComparisonService.compareModels(source.toXRayImage(entity.getBodyPart()));
+    }
+
+    public ModelComparisonService modelComparison() {
+        return modelComparisonService;
     }
 
     public byte[] readImage(AnalysisEntity entity) {
