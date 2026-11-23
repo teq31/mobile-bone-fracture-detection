@@ -47,6 +47,15 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
         this.historyRepository = historyRepository;
     }
 
+    public FractureAnalysisFacade(ImagePreprocessor preprocessor,
+                                  ModelRegistry modelRegistry,
+                                  FractureDetector detector,
+                                  HeatmapGenerator heatmapGenerator,
+                                  HistoryRepository historyRepository,
+                                  boolean contrastStretching) {
+        this(preprocessor, modelRegistry, detector, heatmapGenerator, historyRepository);
+    }
+
     @Override
     public AnalysisResult analyzeXRay(User user, XRayImageSource source, BodyPart bodyPart) {
         XRayImage image = convertAndValidate(source, bodyPart);

@@ -157,6 +157,16 @@ class XRayAnalysisServiceTest {
     }
 
     @Test
+    void contrastStepCanBeTurnedOff() {
+        XRayAnalysisService withoutContrast = new FractureAnalysisFacade(new RecordingPreprocessor(steps), registry,
+                new FractureDetector(mainModel), heatmapGenerator, new HistoryRepository(), false);
+
+        withoutContrast.analyzeXRay(student, source, BodyPart.WRIST);
+
+        assertEquals(List.of("resize", "detect YOLO"), steps);
+    }
+
+    @Test
     void boxesAreOnTheOriginalXRayNotOnTheResizedCopy() throws IOException {
         XRayImage original = pngImage(1280, 640);
         XRayImage prepared = pngImage(640, 320);
