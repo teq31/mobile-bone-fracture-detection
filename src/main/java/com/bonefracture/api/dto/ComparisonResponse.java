@@ -30,13 +30,16 @@ public record ComparisonResponse(int totalModels, List<FindingDto> findings) {
 
         public static FindingDto from(DetectionComponent finding, ModelComparisonService service) {
             Rectangle box = finding.getBoundingBox();
+            AnalysisResponse.BoundingBoxDto boundingBox = box == null
+                    ? null
+                    : new AnalysisResponse.BoundingBoxDto(box.x, box.y, box.width, box.height);
             List<String> modelNames = finding.getModels().stream()
                     .map(DetectionModel::getName)
                     .toList();
             return new FindingDto(
                     finding.getLabel(),
                     finding.getConfidence(),
-                    AnalysisResponse.BoundingBoxDto.from(box),
+                    boundingBox,
                     service.getAgreementLevel(finding),
                     finding.getAgreementCount(),
                     modelNames);
