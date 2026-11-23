@@ -34,6 +34,7 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
     private FractureDetector detector;
     private HeatmapGenerator heatmapGenerator;
     private HistoryRepository historyRepository;
+    private boolean contrastStretching = true;
 
     public FractureAnalysisFacade(ImagePreprocessor preprocessor,
                                   ModelRegistry modelRegistry,
@@ -54,6 +55,7 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
                                   HistoryRepository historyRepository,
                                   boolean contrastStretching) {
         this(preprocessor, modelRegistry, detector, heatmapGenerator, historyRepository);
+        this.contrastStretching = contrastStretching;
     }
 
     @Override
@@ -115,7 +117,8 @@ public class FractureAnalysisFacade implements XRayAnalysisService {
     }
 
     private XRayImage preprocess(XRayImage image) {
-        return preprocessor.normalize(preprocessor.resize(image));
+        XRayImage resized = preprocessor.resize(image);
+        return contrastStretching ? preprocessor.normalize(resized) : resized;
     }
 
     // detector saves the result on the resized copy, history needs it on the original
