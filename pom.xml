@@ -13,7 +13,8 @@
 
     <groupId>com.bonefracture</groupId>
     <artifactId>mobile-bone-fracture-detection</artifactId>
-    <version>0.1.0</version>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>21</java.version>
@@ -59,10 +60,15 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- AOP: AspectJ, aspects are woven at compile time (same setup as Alexandra's branch) -->
+        <!-- AOP: AspectJ, aspects are woven at compile time -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
             <version>${aspectj.version}</version>
         </dependency>
 

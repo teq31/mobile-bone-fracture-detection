@@ -4,8 +4,9 @@ import com.bonefracture.detection.DetectionModel;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-
+import java.util.Map;
 
 public class DetectionGroup implements DetectionComponent {
 
@@ -24,32 +25,66 @@ public class DetectionGroup implements DetectionComponent {
 
     @Override
     public Rectangle getBoundingBox() {
-        // TODO union or average of the children boxes
-        return null;
+        if (children.isEmpty()) {
+            return null;
+        }
+        Rectangle union = null;
+        for (DetectionComponent child : children) {
+            Rectangle box = child.getBoundingBox();
+            if (box == null) {
+                continue;
+            }
+            union = (union == null) ? new Rectangle(box) : union.union(box);
+        }
+        return union;
     }
 
     @Override
     public float getConfidence() {
-        // TODO average confidence of the children
-        return 0;
+        if (children.isEmpty()) {
+            return 0;
+        }
+        float sum = 0;
+        for (DetectionComponent child : children) {
+            sum += child.getConfidence();
+        }
+        return sum / children.size();
     }
 
     @Override
     public String getLabel() {
-        // TODO most frequent label among children
-        return null;
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (DetectionComponent child : children) {
+            String label = child.getLabel();
+            counts.merge(label, 1, Integer::sum);
+        }
+        String best = null;
+        int bestCount = 0;
+        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+            if (entry.getValue() > bestCount) {
+                bestCount = entry.getValue();
+                best = entry.getKey();
+            }
+        }
+        return best;
     }
 
     @Override
     public List<DetectionModel> getModels() {
-        // TODO distinct models over all children
-        return null;
+        List<DetectionModel> models = new ArrayList<>();
+        for (DetectionComponent child : children) {
+            for (DetectionModel model : child.getModels()) {
+                if (!models.contains(model)) {
+                    models.add(model);
+                }
+            }
+        }
+        return models;
     }
 
     @Override
     public int getAgreementCount() {
-        // TODO number of distinct models
-        return 0;
+        return getModels().size();
     }
 
     @Override
@@ -62,18 +97,35 @@ public class DetectionGroup implements DetectionComponent {
     public List<DetectionComponent> getChildren() { return children; }
 
     public boolean accepts(DetectionComponent component) {
-        // TODO
-        return false;
+        Rectangle current = getBoundingBox();
+        if (current == null) {
+            return true;
+        }
+        return intersectionOverUnion(current, component.getBoundingBox()) >= minIou;
     }
 
     public AgreementLevel getAgreementLevel(int totalModels) {
-        // TODO NONE / PARTIAL / FULL
-        return null;
+        int count = getAgreementCount();
+        if (count <= 1) {
+            return AgreementLevel.NONE;
+        }
+        if (count >= totalModels) {
+            return AgreementLevel.FULL;
+        }
+        return AgreementLevel.PARTIAL;
     }
 
     private float intersectionOverUnion(Rectangle a, Rectangle b) {
-        // TODO
-        return 0;
+        if (a == null || b == null) {
+            return 0;
+        }
+        Rectangle intersection = a.intersection(b);
+        if (intersection.isEmpty()) {
+            return 0;
+        }
+        float intersectionArea = (float) intersection.width * intersection.height;
+        float unionArea = (float) a.width * a.height + (float) b.width * b.height - intersectionArea;
+        return unionArea <= 0 ? 0 : intersectionArea / unionArea;
     }
 
     public float getMinIou() { return minIou; }

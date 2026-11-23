@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-bonefracture}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-bonefracture}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-bonefracture}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-me-0123456789}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-bonefracture}
+      POSTGRES_USER: ${DB_USERNAME:-bonefracture}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-bonefracture}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bonefracture}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
