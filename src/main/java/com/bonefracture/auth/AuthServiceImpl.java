@@ -62,4 +62,9 @@ public class AuthServiceImpl implements AuthService {
     public List<UserEntity> unverifiedDoctors() {
         return userRepository.findByRoleAndVerifiedFalse(Role.DOCTOR);
     }
+
+    @Override
+    public List<UserEntity> verifiedDoctors() {
+        return userRepository.findByRoleAndVerifiedTrueOrderByNameAsc(Role.DOCTOR);
+    }
 }

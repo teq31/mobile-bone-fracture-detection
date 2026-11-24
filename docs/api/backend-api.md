@@ -59,6 +59,25 @@ The token holds the user id (`sub`), `email` and `role`.
 
 ---
 
+## Doctors
+
+### GET /api/doctors
+
+Any logged-in user. The doctors verified by an administrator, sorted by name: the list a patient
+chooses from when requesting an appointment (its `id` is the `doctorId` below). Doctors who are
+not verified yet are not in the list.
+
+`200 OK`:
+
+```json
+[
+  { "id": 4, "name": "Andrei Ionescu", "email": "andrei@clinic.com" },
+  { "id": 2, "name": "Maria Pop", "email": "maria@clinic.com" }
+]
+```
+
+---
+
 ## Appointments
 
 Appointment body returned by every endpoint below:
