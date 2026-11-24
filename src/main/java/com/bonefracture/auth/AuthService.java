@@ -22,4 +22,7 @@ public interface AuthService {
     UserEntity verifyDoctor(String doctorEmail);
 
     List<UserEntity> unverifiedDoctors();
+
+    /** Verified doctors sorted by name: the ones a patient can choose for an appointment. */
+    List<UserEntity> verifiedDoctors();
 }
