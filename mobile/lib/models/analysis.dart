@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-/// A rectangle in the pixels of the analysed image.
+// in pixels of the analysed image, not screen pixels
 class BoundingBox {
   final double x;
   final double y;
@@ -31,7 +31,6 @@ class Detection {
       );
 }
 
-/// Response of POST /api/analyses (docs/api/api-contract.md).
 class Analysis {
   final String id;
   final String model;
@@ -39,7 +38,7 @@ class Analysis {
   final String? imageUrl;
   final DateTime createdAt;
 
-  /// The image the boxes refer to; filled by the app (downloaded, or the picked file in demo mode).
+  // filled in by the app, not part of the json
   final Uint8List? imageBytes;
 
   const Analysis({
@@ -76,7 +75,6 @@ class Analysis {
       detections.fold<double>(0, (best, d) => d.confidence > best ? d.confidence : best);
 }
 
-/// One item of GET /api/analyses/history.
 class HistoryItem {
   final String analysisId;
   final String model;
@@ -93,11 +91,10 @@ class HistoryItem {
       );
 }
 
-/// One finding of GET /api/analyses/{id}/comparison (doctor only).
 class ComparisonFinding {
   final String label;
   final double confidence;
-  final BoundingBox box;
+  final BoundingBox? box;
   final String agreementLevel;
   final int agreementCount;
   final List<String> models;
@@ -114,7 +111,7 @@ class ComparisonFinding {
   factory ComparisonFinding.fromJson(Map<String, dynamic> json) => ComparisonFinding(
         label: json['label'] as String? ?? 'fracture',
         confidence: (json['confidence'] as num? ?? 0).toDouble(),
-        box: BoundingBox.fromJson(json['boundingBox'] as Map<String, dynamic>),
+        box: json['boundingBox'] == null ? null : BoundingBox.fromJson(json['boundingBox'] as Map<String, dynamic>),
         agreementLevel: json['agreementLevel'] as String? ?? 'NONE',
         agreementCount: (json['agreementCount'] as num? ?? 0).toInt(),
         models: (json['models'] as List<dynamic>? ?? []).map((m) => m.toString()).toList(),
@@ -128,8 +125,9 @@ class Comparison {
 
   const Comparison({required this.analysisId, required this.totalModels, required this.findings});
 
-  factory Comparison.fromJson(Map<String, dynamic> json) => Comparison(
-        analysisId: json['analysisId'].toString(),
+  // the server doesn't send the id back, so we pass the one we asked for
+  factory Comparison.fromJson(Map<String, dynamic> json, {required String analysisId}) => Comparison(
+        analysisId: analysisId,
         totalModels: (json['totalModels'] as num? ?? 0).toInt(),
         findings: (json['findings'] as List<dynamic>? ?? [])
             .map((f) => ComparisonFinding.fromJson(f as Map<String, dynamic>))

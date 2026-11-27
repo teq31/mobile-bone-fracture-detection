@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(user.name),
-                  subtitle: Text('${roleLabel(user.role)} · ID ${user.id}\n${user.email}'
+                  subtitle: Text('${roleLabel(user.role)} · ${user.email}'
                       '${user.isDoctor && !user.verified ? '\nNot verified yet' : ''}'),
                 ),
               ),

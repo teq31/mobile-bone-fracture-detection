@@ -4,7 +4,6 @@ import '../app_scope.dart';
 import '../models/app_notification.dart';
 import '../widgets/common.dart';
 
-/// Notifications from the server (appointment confirmed, cancelled, reminder).
 class NotificationsScreen extends StatefulWidget {
   final bool visible;
 

@@ -7,7 +7,6 @@ import '../widgets/xray_viewer.dart';
 import 'appointments_screen.dart';
 import 'comparison_screen.dart';
 
-/// The result of one analysis: the X-ray with the boxes (and the heatmap), a summary and the next steps.
 class ResultScreen extends StatefulWidget {
   final Analysis analysis;
 
@@ -36,7 +35,9 @@ class _ResultScreenState extends State<ResultScreen> {
           AspectRatio(
             aspectRatio: 1,
             child: bytes == null
-                ? const MessageView(icon: Icons.image_not_supported_outlined, message: 'The image is not available')
+                ? const MessageView(
+                    icon: Icons.image_not_supported_outlined,
+                    message: 'The X-ray can\'t be shown here (PDF / DICOM), but the results are below')
                 : XRayViewer.forDetections(bytes, analysis.detections,
                     showBoxes: _showBoxes, showHeatmap: _showHeatmap),
           ),

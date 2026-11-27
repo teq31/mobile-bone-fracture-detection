@@ -5,7 +5,7 @@ import '../models/analysis.dart';
 import '../widgets/common.dart';
 import 'result_screen.dart';
 
-/// The user's past analyses, newest first. Reloaded every time the tab is opened.
+// reloads every time the tab is opened
 class HistoryScreen extends StatefulWidget {
   final bool visible;
 

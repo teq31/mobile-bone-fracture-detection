@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_scope.dart';
+import 'screens/admin_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 
@@ -37,7 +38,6 @@ class BoneFractureApp extends StatelessWidget {
   }
 }
 
-/// Restores the saved session, then shows the login or the home screen.
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
 
@@ -72,6 +72,7 @@ class _StartScreenState extends State<StartScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final user = AppScope.of(context).user;
-    return user == null ? const LoginScreen() : const HomeScreen();
+    if (user == null) return const LoginScreen();
+    return user.isAdmin ? const AdminHomeScreen() : const HomeScreen();
   }
 }

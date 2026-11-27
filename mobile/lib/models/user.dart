@@ -28,7 +28,6 @@ String roleLabel(Role role) {
   }
 }
 
-/// Body of POST /api/auth/register and GET /api/auth/me.
 class User {
   final int id;
   final String name;
@@ -54,4 +53,5 @@ class User {
 
   bool get isDoctor => role == Role.doctor;
   bool get isPatient => role == Role.patient;
+  bool get isAdmin => role == Role.administrator;
 }

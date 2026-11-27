@@ -1,11 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:bone_fracture_app/models/analysis.dart';
 import 'package:bone_fracture_app/models/app_notification.dart';
 import 'package:bone_fracture_app/models/appointment.dart';
+import 'package:bone_fracture_app/models/audit_entry.dart';
+import 'package:bone_fracture_app/models/doctor.dart';
+import 'package:bone_fracture_app/models/operation_stats.dart';
 import 'package:bone_fracture_app/models/user.dart';
+import 'package:bone_fracture_app/services/analysis_service.dart';
 import 'package:bone_fracture_app/services/api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The app reads exactly the JSON described in docs/api/backend-api.md and docs/api/api-contract.md.
+// json examples copied from backend-api.md / api-contract.md
 void main() {
   test('user from /api/auth/me', () {
     final user = User.fromJson({'id': 2, 'name': 'Dr. Smith', 'email': 'smith@clinic.com', 'role': 'DOCTOR', 'verified': false});
@@ -53,9 +59,8 @@ void main() {
     expect(analysis.highestConfidence, 0);
   });
 
-  test('comparison for a doctor', () {
+  test('comparison for a doctor (the server does not send the id back)', () {
     final comparison = Comparison.fromJson({
-      'analysisId': '42',
       'totalModels': 2,
       'findings': [
         {
@@ -65,12 +70,22 @@ void main() {
           'agreementLevel': 'FULL',
           'agreementCount': 2,
           'models': ['YOLO', 'RF-DETR']
+        },
+        {
+          'label': 'fracture',
+          'confidence': 0.4,
+          'boundingBox': null,
+          'agreementLevel': 'NONE',
+          'agreementCount': 1,
+          'models': ['YOLO']
         }
       ]
-    });
+    }, analysisId: '42');
 
+    expect(comparison.analysisId, '42');
     expect(comparison.totalModels, 2);
-    expect(comparison.findings.single.models, ['YOLO', 'RF-DETR']);
+    expect(comparison.findings.last.box, isNull);
+    expect(comparison.findings.first.models, ['YOLO', 'RF-DETR']);
   });
 
   test('appointment and notification', () {
@@ -94,6 +109,76 @@ void main() {
     expect(appointment.status, AppointmentStatus.confirmed);
     expect(appointment.dateTime, DateTime(2026, 12, 1, 10));
     expect(notification.read, isFalse);
+  });
+
+  test('analysis exactly as the backend sends it (numeric id, local time)', () {
+    final analysis = Analysis.fromJson({
+      'analysisId': 7,
+      'model': 'YOLO',
+      'detections': [
+        {
+          'label': 'fracture',
+          'confidence': 0.91,
+          'boundingBox': {'x': 412, 'y': 880, 'width': 96, 'height': 74}
+        }
+      ],
+      'imageUrl': '/api/analyses/7/image',
+      'createdAt': '2026-11-24T10:15:30.123456'
+    });
+
+    expect(analysis.id, '7');
+    expect(analysis.imageUrl, '/api/analyses/7/image');
+    expect(analysis.createdAt, DateTime(2026, 11, 24, 10, 15, 30, 123, 456));
+  });
+
+  test('only png and jpg can be drawn', () {
+    expect(isDisplayableImage(Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 0x0D])), isTrue);
+    expect(isDisplayableImage(Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0])), isTrue);
+    expect(isDisplayableImage(Uint8List.fromList([0x25, 0x50, 0x44, 0x46])), isFalse); // %PDF
+    expect(isDisplayableImage(Uint8List(0)), isFalse);
+  });
+
+  test('doctor from GET /api/doctors', () {
+    final doctor = Doctor.fromJson({'id': 2, 'name': 'Dr. Smith', 'email': 'smith@clinic.com'});
+
+    expect(doctor.id, 2);
+    expect(doctor.name, 'Dr. Smith');
+  });
+
+  test('audit entry from GET /api/admin/audit', () {
+    final entry = AuditEntry.fromJson({
+      'time': '2026-11-24T08:15:30.123Z',
+      'actor': 'admin@clinic.com',
+      'action': 'VERIFY_DOCTOR',
+      'target': 'dan@clinic.com',
+      'success': true
+    });
+
+    expect(entry.action, 'VERIFY_DOCTOR');
+    expect(entry.time, DateTime.utc(2026, 11, 24, 8, 15, 30, 123));
+    expect(entry.success, isTrue);
+  });
+
+  test('administrator role', () {
+    final admin = User.fromJson({'id': 1, 'name': 'Admin', 'email': 'admin@clinic.com', 'role': 'ADMINISTRATOR', 'verified': false});
+
+    expect(admin.isAdmin, isTrue);
+  });
+
+  test('performance line from GET /api/performance/stats', () {
+    final stats = OperationStats.fromJson({
+      'operation': 'YoloOnnxModel.detect',
+      'calls': 3,
+      'failures': 0,
+      'averageMillis': 152.4,
+      'minMillis': 140.1,
+      'maxMillis': 170.0,
+      'lastMillis': 147.2
+    });
+
+    expect(stats.operation, 'YoloOnnxModel.detect');
+    expect(stats.calls, 3);
+    expect(stats.averageMillis, 152.4);
   });
 
   test('error message from a ProblemDetail body', () {

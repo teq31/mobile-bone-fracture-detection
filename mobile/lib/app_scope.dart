@@ -2,13 +2,13 @@ import 'package:flutter/widgets.dart';
 
 import 'config.dart';
 import 'models/user.dart';
+import 'services/admin_service.dart';
 import 'services/analysis_service.dart';
 import 'services/api_client.dart';
 import 'services/appointment_service.dart';
 import 'services/auth_service.dart';
 import 'services/notification_service.dart';
 
-/// The services of the app and the logged-in user, shared by every screen.
 class AppState extends ChangeNotifier {
   final ApiClient api;
   late final AuthService auth = AuthService(api);
@@ -16,6 +16,7 @@ class AppState extends ChangeNotifier {
       AppConfig.useMockAnalysis ? MockAnalysisService() : HttpAnalysisService(api);
   late final AppointmentService appointments = AppointmentService(api);
   late final NotificationService notifications = NotificationService(api);
+  late final AdminService admin = AdminService(api);
 
   User? _user;
 

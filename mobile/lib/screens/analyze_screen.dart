@@ -7,7 +7,6 @@ import '../services/analysis_service.dart';
 import '../widgets/common.dart';
 import 'result_screen.dart';
 
-/// Choose the X-ray (gallery, camera, PDF, DICOM) and the body part, then send it for analysis.
 class AnalyzeScreen extends StatefulWidget {
   final VoidCallback? onAnalyzed;
 
@@ -101,7 +100,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: xray == null
-                ? const MessageView(icon: Icons.add_photo_alternate_outlined, message: 'Choose an X-ray of the wrist, elbow, hand or ankle')
+                ? const MessageView(icon: Icons.add_photo_alternate_outlined, message: 'Choose an X-ray of the wrist, elbow or ankle')
                 : xray.isDisplayable
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(16),

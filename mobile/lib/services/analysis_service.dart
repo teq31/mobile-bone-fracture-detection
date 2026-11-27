@@ -8,11 +8,11 @@ import 'api_client.dart';
 
 enum XRaySource { gallery, camera, pdf, dicom }
 
-enum BodyPart { wrist, elbow, hand, ankle }
+// same values as the BodyPart enum on the server
+enum BodyPart { wrist, elbow, ankle }
 
 String bodyPartLabel(BodyPart part) => part.name[0].toUpperCase() + part.name.substring(1);
 
-/// The X-ray chosen by the user, before it is sent for analysis.
 class PickedXRay {
   final Uint8List bytes;
   final String fileName;
@@ -20,26 +20,23 @@ class PickedXRay {
 
   const PickedXRay({required this.bytes, required this.fileName, required this.source});
 
-  /// JPG / PNG can be shown on the phone; PDF and DICOM are converted on the server (adapters).
+  // pdf / dicom only get converted on the server
   bool get isDisplayable => source == XRaySource.gallery || source == XRaySource.camera;
 }
 
-/// The analysis endpoints of docs/api/api-contract.md.
+// endpoints from Alexandra's api-contract.md
 abstract class AnalysisService {
   Future<Analysis> analyze(PickedXRay xray, BodyPart bodyPart);
 
   Future<List<HistoryItem>> history();
 
-  /// The analysis with its image, e.g. when it is opened from the history.
   Future<Analysis> open(HistoryItem item);
 
   Future<Comparison> compare(String analysisId);
 
-  /// true when the analysis does not use the real model (shown in the app)
   bool get isDemo;
 }
 
-/// The real backend: POST /api/analyses, GET /api/analyses/history, GET /api/analyses/{id}/comparison.
 class HttpAnalysisService implements AnalysisService {
   final ApiClient _api;
 
@@ -76,14 +73,17 @@ class HttpAnalysisService implements AnalysisService {
 
   @override
   Future<Comparison> compare(String analysisId) async =>
-      Comparison.fromJson(await _api.get('/api/analyses/$analysisId/comparison') as Map<String, dynamic>);
+      Comparison.fromJson(await _api.get('/api/analyses/$analysisId/comparison') as Map<String, dynamic>,
+          analysisId: analysisId);
 
-  /// The boxes refer to the image the model saw (imageUrl), so that is the one the app shows.
+  // boxes are in the pixels of imageUrl, so show that one
   Future<Analysis> _withImage(Analysis analysis, {Uint8List? fallback}) async {
     final url = analysis.imageUrl;
     if (url != null && url.isNotEmpty) {
       try {
-        return analysis.withImage(await _api.getBytes(url));
+        final bytes = await _api.getBytes(url);
+        // for a pdf / dicom upload the server sends the original file back, which we can't draw
+        if (isDisplayableImage(bytes)) return analysis.withImage(bytes);
       } on ApiException {
         // keep the picked image below
       }
@@ -92,8 +92,15 @@ class HttpAnalysisService implements AnalysisService {
   }
 }
 
-/// Demo analysis that runs on the phone until the backend endpoint and the trained model are ready.
-/// The same image always gets the same result. Clearly marked as a demo in the app.
+// png or jpg, by the first bytes
+bool isDisplayableImage(Uint8List bytes) {
+  if (bytes.length < 4) return false;
+  final png = bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47;
+  final jpg = bytes[0] == 0xFF && bytes[1] == 0xD8;
+  return png || jpg;
+}
+
+// fake analysis until /api/analyses + the model are ready (same image -> same result)
 class MockAnalysisService implements AnalysisService {
   static const _models = ['YOLO', 'RF-DETR'];
 

@@ -11,7 +11,6 @@ AppointmentStatus statusFromJson(String value) {
   }
 }
 
-/// Body returned by the /api/appointments endpoints (docs/api/backend-api.md).
 class Appointment {
   final int id;
   final int doctorId;

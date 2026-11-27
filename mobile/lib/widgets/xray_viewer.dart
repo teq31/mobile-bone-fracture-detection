@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/analysis.dart';
 import 'image_fit.dart';
 
-/// The X-ray with the detections drawn over it: a box with the confidence for each fracture and,
-/// optionally, a heatmap (strongest in the centre of the box, like HeatmapGenerator on the server).
+// heatmap here is drawn on the phone (same idea as HeatmapGenerator on the server)
 class XRayViewer extends StatefulWidget {
   final Uint8List imageBytes;
   final List<BoundingBox> boxes;

@@ -3,7 +3,6 @@ import 'package:bone_fracture_app/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Without a saved session the app opens on the login screen.
 void main() {
   testWidgets('starts on the login screen', (tester) async {
     SharedPreferences.setMockInitialValues({});

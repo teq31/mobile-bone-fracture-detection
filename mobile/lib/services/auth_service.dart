@@ -3,8 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import 'api_client.dart';
 
-/// Accounts: POST /api/auth/register, POST /api/auth/login, GET /api/auth/me.
-/// The JWT is kept on the phone, so the user stays logged in after the app is closed.
+// token is saved so you stay logged in
 class AuthService {
   static const _tokenKey = 'jwt';
 
@@ -32,7 +31,6 @@ class AuthService {
 
   Future<User> me() async => User.fromJson(await _api.get('/api/auth/me') as Map<String, dynamic>);
 
-  /// The user from the saved token, or null if there is none or it expired.
   Future<User?> restoreSession() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_tokenKey);

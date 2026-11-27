@@ -4,7 +4,6 @@ import 'package:bone_fracture_app/models/analysis.dart';
 import 'package:bone_fracture_app/widgets/image_fit.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The boxes come in the pixels of the X-ray; on the screen the X-ray is scaled and centred (BoxFit.contain).
 void main() {
   const box = BoundingBox(x: 100, y: 50, width: 200, height: 100);
 
