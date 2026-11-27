@@ -1,4 +1,5 @@
 import '../models/appointment.dart';
+import '../models/doctor.dart';
 import 'api_client.dart';
 
 // the server decides what's allowed (State), we just show the 409 message
@@ -6,6 +7,11 @@ class AppointmentService {
   final ApiClient _api;
 
   AppointmentService(this._api);
+
+  Future<List<Doctor>> doctors() async {
+    final json = await _api.get('/api/doctors') as List<dynamic>;
+    return json.map((d) => Doctor.fromJson(d as Map<String, dynamic>)).toList();
+  }
 
   Future<List<Appointment>> list() async {
     final json = await _api.get('/api/appointments') as List<dynamic>;

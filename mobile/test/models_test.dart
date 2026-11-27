@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:bone_fracture_app/models/analysis.dart';
 import 'package:bone_fracture_app/models/app_notification.dart';
 import 'package:bone_fracture_app/models/appointment.dart';
+import 'package:bone_fracture_app/models/doctor.dart';
 import 'package:bone_fracture_app/models/user.dart';
 import 'package:bone_fracture_app/services/analysis_service.dart';
 import 'package:bone_fracture_app/services/api_client.dart';
@@ -133,6 +134,13 @@ void main() {
     expect(isDisplayableImage(Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0])), isTrue);
     expect(isDisplayableImage(Uint8List.fromList([0x25, 0x50, 0x44, 0x46])), isFalse); // %PDF
     expect(isDisplayableImage(Uint8List(0)), isFalse);
+  });
+
+  test('doctor from GET /api/doctors', () {
+    final doctor = Doctor.fromJson({'id': 2, 'name': 'Dr. Smith', 'email': 'smith@clinic.com'});
+
+    expect(doctor.id, 2);
+    expect(doctor.name, 'Dr. Smith');
   });
 
   test('error message from a ProblemDetail body', () {

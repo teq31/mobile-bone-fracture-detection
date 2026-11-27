@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../models/appointment.dart';
+import '../models/doctor.dart';
 import '../widgets/common.dart';
 
 class AppointmentsScreen extends StatefulWidget {
@@ -186,14 +187,15 @@ class _RequestAppointmentSheet extends StatefulWidget {
 }
 
 class _RequestAppointmentSheetState extends State<_RequestAppointmentSheet> {
-  final _doctorId = TextEditingController();
+  Future<List<Doctor>>? _doctors;
+  Doctor? _doctor;
   DateTime _dateTime = DateTime.now().add(const Duration(days: 1)).copyWith(hour: 10, minute: 0, second: 0, millisecond: 0, microsecond: 0);
   bool _busy = false;
 
   @override
-  void dispose() {
-    _doctorId.dispose();
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _doctors ??= AppScope.of(context).appointments.doctors();
   }
 
   Future<void> _pickDateTime() async {
@@ -211,14 +213,14 @@ class _RequestAppointmentSheetState extends State<_RequestAppointmentSheet> {
   }
 
   Future<void> _submit() async {
-    final doctorId = int.tryParse(_doctorId.text.trim());
-    if (doctorId == null) {
-      showError(context, 'Enter the doctor ID');
+    final doctor = _doctor;
+    if (doctor == null) {
+      showError(context, 'Choose a doctor');
       return;
     }
     setState(() => _busy = true);
     try {
-      await AppScope.of(context).appointments.request(doctorId, _dateTime);
+      await AppScope.of(context).appointments.request(doctor.id, _dateTime);
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
@@ -238,10 +240,30 @@ class _RequestAppointmentSheetState extends State<_RequestAppointmentSheet> {
         children: [
           Text('Request an appointment', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
-          TextField(
-            controller: _doctorId,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Doctor ID', helperText: 'Ask your doctor for the ID'),
+          FutureBuilder<List<Doctor>>(
+            future: _doctors,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const LinearProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                return Text(snapshot.error.toString(), style: TextStyle(color: Theme.of(context).colorScheme.error));
+              }
+              final doctors = snapshot.data!;
+              if (doctors.isEmpty) {
+                return const Text('No verified doctors yet, please try again later.');
+              }
+              return DropdownButtonFormField<Doctor>(
+                value: _doctor,
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Doctor'),
+                items: [
+                  for (final doctor in doctors)
+                    DropdownMenuItem(value: doctor, child: Text('${doctor.name} (${doctor.email})')),
+                ],
+                onChanged: _busy ? null : (doctor) => setState(() => _doctor = doctor),
+              );
+            },
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
