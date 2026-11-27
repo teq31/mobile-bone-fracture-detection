@@ -125,6 +125,20 @@ or a reminder is sent; they go to the patient.
 
 ---
 
+## Health check (public)
+
+Spring Boot Actuator. No token needed; only the status is shown, no details.
+
+| Endpoint | Result |
+|---|---|
+| `GET /actuator/health` | `200 { "status": "UP" }` when the backend and the database work, `503 { "status": "DOWN" }` otherwise |
+| `GET /actuator/health/liveness` | the application is running (for Docker / Azure restarts) |
+| `GET /actuator/health/readiness` | the application can receive requests |
+
+The other Actuator endpoints (`/actuator/env`, `/actuator/beans`, ...) are not exposed.
+
+---
+
 ## Running with PostgreSQL (docker-compose)
 
 The backend uses H2 in memory by default. In `docker-compose.yml` set these variables on the backend
