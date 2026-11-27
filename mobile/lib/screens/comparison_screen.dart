@@ -52,6 +52,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
             return MessageView(icon: Icons.error_outline, message: snapshot.error.toString(), onRetry: _retry);
           }
           final comparison = snapshot.data!;
+          final drawn = comparison.findings.where((f) => f.box != null).toList();
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -60,9 +61,9 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                   aspectRatio: 1,
                   child: XRayViewer(
                     imageBytes: bytes,
-                    boxes: comparison.findings.map((f) => f.box).toList(),
-                    labels: comparison.findings.map((f) => '${f.agreementCount}/${comparison.totalModels}').toList(),
-                    confidences: comparison.findings.map((f) => f.confidence).toList(),
+                    boxes: drawn.map((f) => f.box!).toList(),
+                    labels: drawn.map((f) => '${f.agreementCount}/${comparison.totalModels}').toList(),
+                    confidences: drawn.map((f) => f.confidence).toList(),
                   ),
                 ),
               const SizedBox(height: 12),

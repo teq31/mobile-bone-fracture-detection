@@ -100,7 +100,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: xray == null
-                ? const MessageView(icon: Icons.add_photo_alternate_outlined, message: 'Choose an X-ray of the wrist, elbow, hand or ankle')
+                ? const MessageView(icon: Icons.add_photo_alternate_outlined, message: 'Choose an X-ray of the wrist, elbow or ankle')
                 : xray.isDisplayable
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(16),

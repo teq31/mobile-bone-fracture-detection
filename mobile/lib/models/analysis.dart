@@ -94,7 +94,7 @@ class HistoryItem {
 class ComparisonFinding {
   final String label;
   final double confidence;
-  final BoundingBox box;
+  final BoundingBox? box;
   final String agreementLevel;
   final int agreementCount;
   final List<String> models;
@@ -111,7 +111,7 @@ class ComparisonFinding {
   factory ComparisonFinding.fromJson(Map<String, dynamic> json) => ComparisonFinding(
         label: json['label'] as String? ?? 'fracture',
         confidence: (json['confidence'] as num? ?? 0).toDouble(),
-        box: BoundingBox.fromJson(json['boundingBox'] as Map<String, dynamic>),
+        box: json['boundingBox'] == null ? null : BoundingBox.fromJson(json['boundingBox'] as Map<String, dynamic>),
         agreementLevel: json['agreementLevel'] as String? ?? 'NONE',
         agreementCount: (json['agreementCount'] as num? ?? 0).toInt(),
         models: (json['models'] as List<dynamic>? ?? []).map((m) => m.toString()).toList(),
@@ -125,8 +125,9 @@ class Comparison {
 
   const Comparison({required this.analysisId, required this.totalModels, required this.findings});
 
-  factory Comparison.fromJson(Map<String, dynamic> json) => Comparison(
-        analysisId: json['analysisId'].toString(),
+  // the server doesn't send the id back, so we pass the one we asked for
+  factory Comparison.fromJson(Map<String, dynamic> json, {required String analysisId}) => Comparison(
+        analysisId: analysisId,
         totalModels: (json['totalModels'] as num? ?? 0).toInt(),
         findings: (json['findings'] as List<dynamic>? ?? [])
             .map((f) => ComparisonFinding.fromJson(f as Map<String, dynamic>))

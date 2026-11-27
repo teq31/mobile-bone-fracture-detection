@@ -8,7 +8,8 @@ import 'api_client.dart';
 
 enum XRaySource { gallery, camera, pdf, dicom }
 
-enum BodyPart { wrist, elbow, hand, ankle }
+// same values as the BodyPart enum on the server
+enum BodyPart { wrist, elbow, ankle }
 
 String bodyPartLabel(BodyPart part) => part.name[0].toUpperCase() + part.name.substring(1);
 
@@ -72,20 +73,31 @@ class HttpAnalysisService implements AnalysisService {
 
   @override
   Future<Comparison> compare(String analysisId) async =>
-      Comparison.fromJson(await _api.get('/api/analyses/$analysisId/comparison') as Map<String, dynamic>);
+      Comparison.fromJson(await _api.get('/api/analyses/$analysisId/comparison') as Map<String, dynamic>,
+          analysisId: analysisId);
 
   // boxes are in the pixels of imageUrl, so show that one
   Future<Analysis> _withImage(Analysis analysis, {Uint8List? fallback}) async {
     final url = analysis.imageUrl;
     if (url != null && url.isNotEmpty) {
       try {
-        return analysis.withImage(await _api.getBytes(url));
+        final bytes = await _api.getBytes(url);
+        // for a pdf / dicom upload the server sends the original file back, which we can't draw
+        if (isDisplayableImage(bytes)) return analysis.withImage(bytes);
       } on ApiException {
         // keep the picked image below
       }
     }
     return fallback == null ? analysis : analysis.withImage(fallback);
   }
+}
+
+// png or jpg, by the first bytes
+bool isDisplayableImage(Uint8List bytes) {
+  if (bytes.length < 4) return false;
+  final png = bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47;
+  final jpg = bytes[0] == 0xFF && bytes[1] == 0xD8;
+  return png || jpg;
 }
 
 // fake analysis until /api/analyses + the model are ready (same image -> same result)

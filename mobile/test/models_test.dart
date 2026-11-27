@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:bone_fracture_app/models/analysis.dart';
 import 'package:bone_fracture_app/models/app_notification.dart';
 import 'package:bone_fracture_app/models/appointment.dart';
 import 'package:bone_fracture_app/models/user.dart';
+import 'package:bone_fracture_app/services/analysis_service.dart';
 import 'package:bone_fracture_app/services/api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -53,9 +56,8 @@ void main() {
     expect(analysis.highestConfidence, 0);
   });
 
-  test('comparison for a doctor', () {
+  test('comparison for a doctor (the server does not send the id back)', () {
     final comparison = Comparison.fromJson({
-      'analysisId': '42',
       'totalModels': 2,
       'findings': [
         {
@@ -65,12 +67,22 @@ void main() {
           'agreementLevel': 'FULL',
           'agreementCount': 2,
           'models': ['YOLO', 'RF-DETR']
+        },
+        {
+          'label': 'fracture',
+          'confidence': 0.4,
+          'boundingBox': null,
+          'agreementLevel': 'NONE',
+          'agreementCount': 1,
+          'models': ['YOLO']
         }
       ]
-    });
+    }, analysisId: '42');
 
+    expect(comparison.analysisId, '42');
     expect(comparison.totalModels, 2);
-    expect(comparison.findings.single.models, ['YOLO', 'RF-DETR']);
+    expect(comparison.findings.last.box, isNull);
+    expect(comparison.findings.first.models, ['YOLO', 'RF-DETR']);
   });
 
   test('appointment and notification', () {
@@ -94,6 +106,33 @@ void main() {
     expect(appointment.status, AppointmentStatus.confirmed);
     expect(appointment.dateTime, DateTime(2026, 12, 1, 10));
     expect(notification.read, isFalse);
+  });
+
+  test('analysis exactly as the backend sends it (numeric id, local time)', () {
+    final analysis = Analysis.fromJson({
+      'analysisId': 7,
+      'model': 'YOLO',
+      'detections': [
+        {
+          'label': 'fracture',
+          'confidence': 0.91,
+          'boundingBox': {'x': 412, 'y': 880, 'width': 96, 'height': 74}
+        }
+      ],
+      'imageUrl': '/api/analyses/7/image',
+      'createdAt': '2026-11-24T10:15:30.123456'
+    });
+
+    expect(analysis.id, '7');
+    expect(analysis.imageUrl, '/api/analyses/7/image');
+    expect(analysis.createdAt, DateTime(2026, 11, 24, 10, 15, 30, 123, 456));
+  });
+
+  test('only png and jpg can be drawn', () {
+    expect(isDisplayableImage(Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 0x0D])), isTrue);
+    expect(isDisplayableImage(Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0])), isTrue);
+    expect(isDisplayableImage(Uint8List.fromList([0x25, 0x50, 0x44, 0x46])), isFalse); // %PDF
+    expect(isDisplayableImage(Uint8List(0)), isFalse);
   });
 
   test('error message from a ProblemDetail body', () {
