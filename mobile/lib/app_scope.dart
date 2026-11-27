@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'config.dart';
 import 'models/user.dart';
+import 'services/admin_service.dart';
 import 'services/analysis_service.dart';
 import 'services/api_client.dart';
 import 'services/appointment_service.dart';
@@ -15,6 +16,7 @@ class AppState extends ChangeNotifier {
       AppConfig.useMockAnalysis ? MockAnalysisService() : HttpAnalysisService(api);
   late final AppointmentService appointments = AppointmentService(api);
   late final NotificationService notifications = NotificationService(api);
+  late final AdminService admin = AdminService(api);
 
   User? _user;
 

@@ -53,4 +53,5 @@ class User {
 
   bool get isDoctor => role == Role.doctor;
   bool get isPatient => role == Role.patient;
+  bool get isAdmin => role == Role.administrator;
 }

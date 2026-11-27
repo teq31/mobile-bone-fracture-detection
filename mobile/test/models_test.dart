@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:bone_fracture_app/models/analysis.dart';
 import 'package:bone_fracture_app/models/app_notification.dart';
 import 'package:bone_fracture_app/models/appointment.dart';
+import 'package:bone_fracture_app/models/audit_entry.dart';
 import 'package:bone_fracture_app/models/doctor.dart';
 import 'package:bone_fracture_app/models/user.dart';
 import 'package:bone_fracture_app/services/analysis_service.dart';
@@ -141,6 +142,26 @@ void main() {
 
     expect(doctor.id, 2);
     expect(doctor.name, 'Dr. Smith');
+  });
+
+  test('audit entry from GET /api/admin/audit', () {
+    final entry = AuditEntry.fromJson({
+      'time': '2026-11-24T08:15:30.123Z',
+      'actor': 'admin@clinic.com',
+      'action': 'VERIFY_DOCTOR',
+      'target': 'dan@clinic.com',
+      'success': true
+    });
+
+    expect(entry.action, 'VERIFY_DOCTOR');
+    expect(entry.time, DateTime.utc(2026, 11, 24, 8, 15, 30, 123));
+    expect(entry.success, isTrue);
+  });
+
+  test('administrator role', () {
+    final admin = User.fromJson({'id': 1, 'name': 'Admin', 'email': 'admin@clinic.com', 'role': 'ADMINISTRATOR', 'verified': false});
+
+    expect(admin.isAdmin, isTrue);
   });
 
   test('error message from a ProblemDetail body', () {
