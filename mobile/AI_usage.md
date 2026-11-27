@@ -22,3 +22,18 @@
 **Advantages:** the app works now with the real accounts, appointments and notifications, and the analysis part
 needs no change when the endpoint is ready. **Disadvantages:** the code was written without a compiler, so it had to
 be checked locally; the box-based heatmap is drawn on the phone instead of using `heatmapUrl`.
+
+# Use of AI Tools - Lab 8 (app on the real analysis, admin screens, CI)
+
+**Tool:** Claude Opus 5.5 (Anthropic), via claude.ai, with read-only access to the team GitHub repository.
+
+**Prompt** (translated from Romanian): "Help me do my part, but don't push anything, I will. Create a new branch from
+what is in main now, and if you work in several commits let me check each commit; I push if I'm happy with it."
+
+**How the result was used:**
+- The AI read what the team had merged that week (Alexandra's analysis API, Federica's doctors endpoint and CI,
+  Ianis's admin endpoints and model) and made one commit per change on `teodora/app-integration`: the app on the
+  real endpoint and its JSON, the doctor list, the admin screens, `GET /api/performance/stats` (test first, then
+  the code), the Flutter CI and this documentation.
+- I checked every commit, ran `mvn clean test`, `flutter analyze`, `flutter test` and the app against the
+  backend before pushing.
