@@ -5,6 +5,7 @@ import 'package:bone_fracture_app/models/app_notification.dart';
 import 'package:bone_fracture_app/models/appointment.dart';
 import 'package:bone_fracture_app/models/audit_entry.dart';
 import 'package:bone_fracture_app/models/doctor.dart';
+import 'package:bone_fracture_app/models/operation_stats.dart';
 import 'package:bone_fracture_app/models/user.dart';
 import 'package:bone_fracture_app/services/analysis_service.dart';
 import 'package:bone_fracture_app/services/api_client.dart';
@@ -162,6 +163,22 @@ void main() {
     final admin = User.fromJson({'id': 1, 'name': 'Admin', 'email': 'admin@clinic.com', 'role': 'ADMINISTRATOR', 'verified': false});
 
     expect(admin.isAdmin, isTrue);
+  });
+
+  test('performance line from GET /api/performance/stats', () {
+    final stats = OperationStats.fromJson({
+      'operation': 'YoloOnnxModel.detect',
+      'calls': 3,
+      'failures': 0,
+      'averageMillis': 152.4,
+      'minMillis': 140.1,
+      'maxMillis': 170.0,
+      'lastMillis': 147.2
+    });
+
+    expect(stats.operation, 'YoloOnnxModel.detect');
+    expect(stats.calls, 3);
+    expect(stats.averageMillis, 152.4);
   });
 
   test('error message from a ProblemDetail body', () {

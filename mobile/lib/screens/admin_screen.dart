@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../models/audit_entry.dart';
+import '../models/operation_stats.dart';
 import '../models/user.dart';
 import '../widgets/common.dart';
 
@@ -21,7 +22,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final state = AppScope.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_tab == 0 ? 'Doctors to verify' : 'Account activity'),
+        title: Text(const ['Doctors to verify', 'Account activity', 'Analysis speed'][_tab]),
         actions: [
           IconButton(tooltip: 'Log out', icon: const Icon(Icons.logout), onPressed: state.logout),
         ],
@@ -31,6 +32,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         children: [
           _UnverifiedDoctors(visible: _tab == 0),
           _AuditLog(visible: _tab == 1),
+          _Performance(visible: _tab == 2),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -39,6 +41,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.verified_user_outlined), selectedIcon: Icon(Icons.verified_user), label: 'Doctors'),
           NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: 'Audit'),
+          NavigationDestination(icon: Icon(Icons.speed_outlined), selectedIcon: Icon(Icons.speed), label: 'Speed'),
         ],
       ),
     );
@@ -210,6 +213,94 @@ class _AuditLogState extends State<_AuditLog> {
                   entry.success ? Icons.check_circle_outline : Icons.error_outline,
                   color: entry.success ? Colors.green : Theme.of(context).colorScheme.error,
                 ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+// how long each step of the analysis takes on the server, slowest first
+class _Performance extends StatefulWidget {
+  final bool visible;
+
+  const _Performance({required this.visible});
+
+  @override
+  State<_Performance> createState() => _PerformanceState();
+}
+
+class _PerformanceState extends State<_Performance> {
+  Future<List<OperationStats>>? _stats;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.visible) _stats ??= _load();
+  }
+
+  @override
+  void didUpdateWidget(_Performance oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.visible && !oldWidget.visible) setState(() => _stats = _load());
+  }
+
+  Future<List<OperationStats>> _load() => AppScope.of(context).admin.performance();
+
+  @override
+  Widget build(BuildContext context) {
+    final stats = _stats;
+    if (stats == null) return const SizedBox.shrink();
+    return FutureBuilder<List<OperationStats>>(
+      future: stats,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return MessageView(
+            icon: Icons.cloud_off,
+            message: snapshot.error.toString(),
+            onRetry: () => setState(() => _stats = _load()),
+          );
+        }
+        final list = snapshot.data!;
+        if (list.isEmpty) {
+          return const MessageView(icon: Icons.speed, message: 'No analyses since the server started');
+        }
+        final slowest = list.first.averageMillis;
+        return RefreshIndicator(
+          onRefresh: () async {
+            final reload = _load();
+            setState(() => _stats = reload);
+            await reload;
+          },
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: list.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 14),
+            itemBuilder: (context, index) {
+              final s = list[index];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text(s.operation, style: const TextStyle(fontWeight: FontWeight.w600))),
+                      Text('${s.averageMillis.toStringAsFixed(1)} ms'),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  LinearProgressIndicator(value: slowest == 0 ? 0 : s.averageMillis / slowest, minHeight: 6),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${s.calls} calls · max ${s.maxMillis.toStringAsFixed(1)} ms'
+                    '${s.failures > 0 ? ' · ${s.failures} failed' : ''}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               );
             },
           ),

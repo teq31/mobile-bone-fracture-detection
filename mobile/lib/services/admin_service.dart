@@ -1,4 +1,5 @@
 import '../models/audit_entry.dart';
+import '../models/operation_stats.dart';
 import '../models/user.dart';
 import 'api_client.dart';
 
@@ -15,6 +16,11 @@ class AdminService {
 
   Future<User> verifyDoctor(String email) async =>
       User.fromJson(await _api.post('/api/admin/doctors/verify', {'email': email}) as Map<String, dynamic>);
+
+  Future<List<OperationStats>> performance() async {
+    final json = await _api.get('/api/performance/stats') as List<dynamic>;
+    return json.map((s) => OperationStats.fromJson(s as Map<String, dynamic>)).toList();
+  }
 
   Future<List<AuditEntry>> audit() async {
     final json = await _api.get('/api/admin/audit') as List<dynamic>;
