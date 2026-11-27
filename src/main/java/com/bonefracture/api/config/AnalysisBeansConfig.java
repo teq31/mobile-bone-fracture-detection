@@ -71,8 +71,10 @@ public class AnalysisBeansConfig {
                                                          ModelRegistry modelRegistry,
                                                          FractureDetector fractureDetector,
                                                          HeatmapGenerator heatmapGenerator,
-                                                         HistoryRepository historyRepository) {
+                                                         HistoryRepository historyRepository,
+                                                         @Value("${app.analysis.contrast-stretching:false}")
+                                                         boolean contrastStretching) {
         return new FractureAnalysisFacade(imagePreprocessor, modelRegistry, fractureDetector,
-                heatmapGenerator, historyRepository);
+                heatmapGenerator, historyRepository, contrastStretching);
     }
 }

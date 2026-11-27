@@ -26,6 +26,28 @@ The validation set has 3,740 fracture boxes, the same number as Table 3 of the p
 - Speed on 4 CPU cores: about 75 ms of inference per image in Python, about 160 ms for a whole
   analysis in Java (reading the 16-bit PNG, letterbox, inference and NMS, measured on 30 test X-rays).
 
+## Preprocessing before the model
+The analysis pipeline (`FractureAnalysisFacade`) resizes the X-ray to 640 px (`ImagePreprocessor.resize`)
+and could also stretch the contrast (`ImagePreprocessor.normalize`). Both were run with the team's Java
+code on the 4,094 validation X-rays and the results evaluated as above:
+
+| Before the model | mAP50 | mAP50-95 | fracture AP50 | fracture AP50-95 |
+|---|---|---|---|---|
+| nothing (only the model's letterbox) | 0.630 | 0.388 | 0.940 | 0.547 |
+| resize | **0.634** | **0.391** | 0.940 | 0.546 |
+| resize + contrast stretching | 0.623 | 0.386 | 0.938 | 0.543 |
+
+Contrast stretching makes every number a little worse: the model was trained on X-rays without it.
+It is therefore off (`app.analysis.contrast-stretching=false`); the resize step stays.
+
+The model runs on the resized copy, so the facade maps the boxes back to the uploaded X-ray before
+they are saved and returned (`FractureAnalysisFacade.onOriginal`); the app draws them on that image.
+
+Phone cameras often store a photo sideways and put the turn in the EXIF Orientation tag, which Java's
+ImageIO ignores. On such a photo the model saw a sideways X-ray and did not find the fracture. Uploaded
+JPEGs are therefore turned upright and saved without EXIF (`xray.ExifOrientation`) before the analysis,
+so the model, the stored image and the app all use the same upright picture.
+
 ## Java: YoloOnnxModel
 `detection.YoloOnnxModel extends DetectionModel` (Strategy) runs the ONNX file with ONNX Runtime:
 
@@ -41,10 +63,9 @@ the main model when `models/yolov8-fracture.onnx` exists (path: `YOLO_MODEL`), o
 placeholder `YoloModel`, so the app starts without the file.
 
 Two aspects of the team already apply to `YoloOnnxModel` through `DetectionModel+.detect(..)`:
-- `CachingAspect` (this branch): the result for the same X-ray comes from the cache, so it is not
+- `CachingAspect` (Federica): the result for the same X-ray comes from the cache, so it is not
   analysed twice;
-- `PerformanceMonitoringAspect` (Teodora, branch `teodora/facade-adapter`): times every analysis step,
-  including the inference.
+- `PerformanceMonitoringAspect` (Teodora): times every analysis step, including the inference.
 
 ## Tests
 - `LetterboxTest`: scale and padding, grey padding, RGB 0..1, 16-bit grey, boxes mapped back and clipped
@@ -53,3 +74,5 @@ Two aspects of the team already apply to `YoloOnnxModel` through `DetectionModel
   Ultralytics on a GRAZPEDWRI-DX test image (confidence within 0.01, boxes within 3 px).
   The last one is skipped when the model file is missing.
 - `AnalysisBeansConfigTest`: ONNX model as main model when the file exists, placeholder otherwise
+
+Demo X-rays with the expected boxes: `demo/README.md`.
